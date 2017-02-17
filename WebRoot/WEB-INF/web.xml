@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
+  <display-name>Paper</display-name>
+  <servlet>
+    <servlet-name>getTraPoints</servlet-name>
+    <servlet-class>com.yu.draw.getTraPoints</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>getUserIds</servlet-name>
+    <servlet-class>com.yu.draw.getUserIds</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>getUserTras</servlet-name>
+    <servlet-class>com.yu.draw.getUserTras</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>getGrid</servlet-name>
+    <servlet-class>com.yu.draw.getGrid</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>getTraInZone</servlet-name>
+    <servlet-class>com.yu.draw.getTraInZone</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>predictionServlet</servlet-name>
+    <servlet-class>com.yu.draw.predictionServlet</servlet-class>
+  </servlet>
+
+
+
+
+
+
+  <servlet-mapping>
+    <servlet-name>getTraPoints</servlet-name>
+    <url-pattern>/getTraPoints</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>getUserIds</servlet-name>
+    <url-pattern>/getUserIds</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>getUserTras</servlet-name>
+    <url-pattern>/getUserTras</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>getGrid</servlet-name>
+    <url-pattern>/getGrid</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>getTraInZone</servlet-name>
+    <url-pattern>/getTraInZone</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>predictionServlet</servlet-name>
+    <url-pattern>/predictionServlet</url-pattern>
+  </servlet-mapping>
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.htm</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>default.html</welcome-file>
+    <welcome-file>default.htm</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+  </welcome-file-list>
+</web-app>

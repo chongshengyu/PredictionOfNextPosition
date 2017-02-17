@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>预测</title>
+	<meta name="content-type" content="text/html; charset=UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport"
+		content="initial-scale=1.0, user-scalable=no, width=device-width">
+	<script src="source/js/jquery.min.js"></script>
+	<script src="http://webapi.amap.com/maps?v=1.3&key=您申请的key值"></script>
+	<link rel="stylesheet" href="source/bootstrap-3.3.7-dist/css/bootstrap.css"> 
+	<script src="source/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+	<link href="source/bootstrap-3.3.7-dist/bootstrapdatetimepick/css/bootstrap-datetimepicker.css" rel="stylesheet">
+	<script src="source/bootstrap-3.3.7-dist/bootstrapdatetimepick/js/bootstrap-datetimepicker.js"></script>
+	<link rel="stylesheet" type="text/css" href="source/css/showTra.css" />
+</head>
+<style>
+	body{
+		font-size:20px;
+	}
+</style>
+<body>
+	<div id="container"></div>
+	<div class='button-group'
+		style="right: auto; filter: alpha(opacity=95); -moz-opacity: 0.95; -khtml-opacity: 0.95; opacity: 0.95;">
+		<div id="header">
+			<div id="panel">
+				<div id='selectUserId'>
+					UserId:
+					<select id='dropUid' onchange="dropUidChg()">
+					</select>
+					已知位置点数：
+					<select id="dropPointNum">
+						<option value="1">1</option>
+						<option value="2">2</option>
+						<option value="3">3</option>
+					</select>
+					时间：
+					<input type="text" id="datetimepicker">
+					<!-- <div id="datetimepicker1">
+					    <input id="datetimepicker" size="16" type="text">
+					    <span class="add-on"><i class="icon-th"></i></span>
+					</div> --> 
+					<input type="button" value="计算Region" onclick="buttonGetRegion()">
+					<input type="button" value="预测" onclick="buttonPredictionClick()">
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script src="source/js/prediction.js"></script>
+</html>

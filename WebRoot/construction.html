@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>构建</title>
+	<meta name="content-type" content="text/html; charset=UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport"
+		content="initial-scale=1.0, user-scalable=no, width=device-width">
+	<script src="source/js/jquery.min.js"></script>
+	<script src="http://webapi.amap.com/maps?v=1.3&key=您申请的key值"></script>
+	<link rel="stylesheet" type="text/css" href="source/css/showTra.css" />
+  </head>
+  
+<body>
+	<div id="container"></div>
+	<div class='button-group'
+		style="right: auto; filter: alpha(opacity=95); -moz-opacity: 0.95; -khtml-opacity: 0.95; opacity: 0.95;">
+		<div id="header">
+			<div id="panel">
+				<div id='selectUserId'>
+					<select id='dropUid' onchange=''>
+					</select>
+					点击点经度:<input type="text" readonly id="txt_lng" value="">
+					点击点纬度:<input type="text" readonly id="txt_lat" value="">
+					相关轨迹:<select id="dropTid"></select>
+					<input type="button" value="get tra Nums" onclick="getTraNums()">
+					<input type="button" value="show tra" onclick="showTra()">
+					<input type="button" value="show next tra" onclick="showNextTra()">
+					<input type="button" value="show All tras" onclick="showAllTra()">
+					<input type="button" value="clear map" onclick="clearOnClick()">
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script src="source/js/constr.js"></script>
+</html>
