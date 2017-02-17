@@ -49,7 +49,7 @@ public class AlgorithmUtil {
 	 */
 	public static Region myPrediction(ArrayList<GPS> gpsList,String time,HashMap<Region, ArrayList<RegionModel>> modelMap){
 		Region nextRegion = null;
-		
+		//
 		return nextRegion;
 	}
 }
