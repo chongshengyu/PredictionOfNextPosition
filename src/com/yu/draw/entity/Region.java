@@ -91,6 +91,11 @@ public class Region {
 	public GPS getRdGps() {
 		return rdGps;
 	}
+	
+	public LinkedList<GridCell> getCellsContainedList() {
+		return cellsContainedList;
+	}
+
 	@Override
 	public String toString() {
 		return "label:"+label +";avgPoint:"+avgPointNum;

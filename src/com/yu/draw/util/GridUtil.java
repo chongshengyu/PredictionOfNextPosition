@@ -567,17 +567,6 @@ public class GridUtil {
 		ArrayList<GPSPoint> pointList = new ArrayList<GPSPoint>();
 		Connection conn = null;
 		Statement stmt = null;
-		String sql = "SELECT Long_gcj,Lat_gcj,DateTime,TraNum FROM location WHERE UserId='"
-				+ userId
-				+ "' AND Long_gcj>'"
-				+ lu_lng
-				+ "' AND Long_gcj<'"
-				+ rd_lng
-				+ "' AND Lat_gcj>'"
-				+ rd_lat
-				+ "' AND Lat_gcj<'"
-				+ lu_lat
-				+ "' AND TraNum in(01320080927120819,01320080927233805,01320081006232359) ORDER BY DateTime";
 		/*String sql = "SELECT Long_gcj,Lat_gcj,DateTime,TraNum FROM location WHERE UserId='"
 				+ userId
 				+ "' AND Long_gcj>'"
@@ -588,7 +577,18 @@ public class GridUtil {
 				+ rd_lat
 				+ "' AND Lat_gcj<'"
 				+ lu_lat
-				+ "' ORDER BY DateTime";*/
+				+ "' AND TraNum in(01320080927120819,01320080927233805,01320081006232359) ORDER BY DateTime";*/
+		String sql = "SELECT Long_gcj,Lat_gcj,DateTime,TraNum FROM location WHERE UserId='"
+				+ userId
+				+ "' AND Long_gcj>'"
+				+ lu_lng
+				+ "' AND Long_gcj<'"
+				+ rd_lng
+				+ "' AND Lat_gcj>'"
+				+ rd_lat
+				+ "' AND Lat_gcj<'"
+				+ lu_lat
+				+ "' ORDER BY DateTime";
 		//01320080927120819,01320080927233805,01320081006232359
 		try {
 			conn = JdbcUtil.getConnection();

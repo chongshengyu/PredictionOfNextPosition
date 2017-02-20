@@ -34,6 +34,7 @@ public class GPSCell{
 	public void setCellTime(String cellTime) {
 		this.cellTime = cellTime;
 	}
+
 	@Override
 	public String toString() {
 		return this.gridX + "," + this.gridY + "," + this.getCellTime();

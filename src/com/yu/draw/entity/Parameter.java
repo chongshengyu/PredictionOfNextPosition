@@ -17,4 +17,6 @@ public class Parameter {
 	 */
 	public static final int leastPointNumInCell = 1;//聚合为region时，cell内的最小有效点数（含）。小于这个值将被舍弃
 	public static final int leastPointNumInTra = 5;//轨迹最少点数，小于此值的轨迹将被舍弃
+	public static final int periodOfHalfLift = 3;//半衰期有效系数的周期，3天
+	public static final double coefficientOfHalfLift = 1.0;//半衰期有效系数的系数
 }

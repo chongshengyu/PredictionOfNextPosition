@@ -10,6 +10,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import com.alibaba.fastjson.JSON;
 import com.yu.draw.entity.GPS;
@@ -18,9 +19,11 @@ import com.yu.draw.entity.GPSPoint;
 import com.yu.draw.entity.GridCell;
 import com.yu.draw.entity.Parameter;
 import com.yu.draw.entity.RectangleZone;
+import com.yu.draw.entity.RectangleZoneWithScore;
 import com.yu.draw.entity.Region;
 import com.yu.draw.entity.RegionModel;
 import com.yu.draw.entity.RegionTime;
+import com.yu.draw.util.AlgorithmUtil;
 import com.yu.draw.util.GridUtil;
 
 public class predictionServlet extends HttpServlet {
@@ -55,6 +58,9 @@ public class predictionServlet extends HttpServlet {
 			String rd_lat = GridUtil.getGridRDGpsByCenter(gpsCenter).getLatitude();
 			// 得到Grid原点坐标
 			GPS originGps = GridUtil.getGridOriginGpsByCenter(gpsCenter);
+			HttpSession session = request.getSession();
+			//存入session
+			session.setAttribute("originGps", originGps);
 			// 得到cellList
 			ArrayList<GridCell> cellList = GridUtil.getGridCellsListByCenter(gpsCenter);
 			// 得到区域内的所有轨迹
@@ -80,6 +86,8 @@ public class predictionServlet extends HttpServlet {
 			ArrayList<ArrayList<RegionTime>> regionTraList = GridUtil.cellTraList2RegionTraList(cellTraList, regionList);
 			//regionTraList => modelMap
 			HashMap<Region, ArrayList<RegionModel>> modelMap = GridUtil.getModelMap(regionList, regionTraList);
+			//modelMap保存到session
+			session.setAttribute("modelMap", modelMap);
 			//测试输出modelMap
 			System.out.println("modelMap:"+modelMap.size());
 			for(Region region:modelMap.keySet()){
@@ -109,22 +117,38 @@ public class predictionServlet extends HttpServlet {
 				zoneList.add(rzc);
 			}
 			// 将grid cells保存到session中
-			
+			session.setAttribute("zoneList", zoneList);
 			String jsonStr = JSON.toJSONString(zoneList);
-			// System.out.println(jsonStr);
 			response.getWriter().write(jsonStr);
 		}else if("prediction".equals(request.getParameter("type"))){
+			System.out.println("预测开始======================");
 			userId = request.getParameter("userId");
-			//time=" + time + "&markerPositions=" + markerPositions,
+			//预测时间
 			String time = request.getParameter("time");
+			System.out.println("预测时的时间："+time);
+			//已知的位置点
 			String markerPosition = request.getParameter("markerPositions");
 			ArrayList<GPS> gpsList = new ArrayList<GPS>();
 			String[] points = markerPosition.split(";");
 			for(String ss:points){
 				gpsList.add(new GPS(ss.split(",")[0],ss.split(",")[1]));
-				System.out.println(ss);
+//				System.out.println(ss);
 			}
-			System.out.println(time);
+			//session中的grid原点
+			GPS originGps = (GPS) request.getSession().getAttribute("originGps");
+			System.out.println("grid原点"+originGps);
+			//session中的modelMap
+			HashMap<Region, ArrayList<RegionModel>> modelMap = (HashMap<Region, ArrayList<RegionModel>>)request.getSession().getAttribute("modelMap");
+			HashMap<Region, Double> scoreMap = AlgorithmUtil.getScoreMap(gpsList, originGps, time, modelMap);
+			ArrayList<RectangleZoneWithScore> rectangleScoreList = new ArrayList<RectangleZoneWithScore>();
+			for(Region region:scoreMap.keySet()){
+				rectangleScoreList.add(new RectangleZoneWithScore(region.getLuGps().getLongitude(), region.getLuGps().getLatitude(), region.getRdGps().getLongitude(), region.getRdGps().getLatitude(), ""+scoreMap.get(region)));
+			}
+			String result = JSON.toJSONString(rectangleScoreList);
+			System.out.println(result);
+			response.getWriter().write(result);
+		}else if("reGetRegion".equals(request.getParameter("type"))){
+			response.getWriter().write(JSON.toJSONString(request.getSession().getAttribute("zoneList")));
 		}
 	}
 

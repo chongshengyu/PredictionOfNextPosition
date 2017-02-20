@@ -147,7 +147,6 @@ public class getGrid extends HttpServlet {
 		
 		// 将grid cells保存到session中
 		String jsonStr = JSON.toJSONString(zoneList);
-		// System.out.println(jsonStr);
 		response.getWriter().write(jsonStr);
 	}
 

@@ -108,13 +108,13 @@ function buttonGetRegion() {
 					if (hasGetRegion) {
 						var lng = e.lnglat.getLng();
 						var lat = e.lnglat.getLat();
-						var positionNumSet = $('#dropPointNum').val();// 已知位置点数，可能是1,2,3
+						var positionNumSet = $('#dropPointNum').val();// 已知位置点数，可能是1,2
 						if (hisMarkNum >= positionNumSet) {// 已经设置完成
 
 						} else {
 							if (hisMarkNum == 0) {// 设置第1个
 								hisMarkNum = hisMarkNum + 1;
-								markerPositions = markerPositions + lng +","+lat+";";
+								markerPositions = markerPositions + lng +","+lat+";";//先存放第一个
 								var marker = new AMap.Marker({
 									icon : "source/img/mark_1.png",
 									position : [lng,lat]
@@ -122,7 +122,7 @@ function buttonGetRegion() {
 								marker.setMap(map);
 							} else if (hisMarkNum == 1) {// 设置第2个
 								hisMarkNum = hisMarkNum + 1;
-								markerPositions = markerPositions + lng +","+lat+";";
+								markerPositions = markerPositions + lng +","+lat+";";//再存放第二个
 								var marker = new AMap.Marker({
 									icon : "source/img/mark_2.png",
 									position : [lng,lat]
@@ -177,6 +177,114 @@ function buttonPredictionClick() {
 			alert("失败");
 		},
 		success : function(data) {
+			for (var i = 0; i < data.length; i++) {
+				var score = data[i]['score'];
+				var zoneStr = data[i]['recZoneStr'];
+				//计算Region中心点
+				var pointslnglat = zoneStr.split(',');
+				var lu_lng = pointslnglat[0];
+				var lu_lat = pointslnglat[1];
+				var rd_lng = pointslnglat[4];
+				var rd_lat = pointslnglat[5];
+				var center_lng = (Number(lu_lng) + Number(rd_lng))/2;
+				var center_lat = (Number(lu_lat) + Number(rd_lat))/2;
+//				alert(center_lng+","+center_lat);
+				//标注
+				var marker = new AMap.Marker({
+					icon : new AMap.Icon({
+						size:new AMap.Size(1,1),
+						image:"source/img/score.png",
+					}),
+					position : [center_lng,center_lat],
+					offset:new AMap.Pixel(-6, -6),
+				});
+			    marker.setLabel({//label默认蓝框白底左上角显示，样式className为：amap-marker-label
+			        offset: new AMap.Pixel(-2, 0),//修改label相对于maker的位置
+			        content: score
+			    });
+			    marker.setMap(map);
+			}
+		}
+	});
+}
+
+//重新预测
+function buttonReset(){
+	hasGetRegion = false;
+	markerPositions = '';
+	hisMarkNum = 0;
+	//前台清除图层
+	map.clearMap();
+	$('#datetimepicker').val("2013-01-01 00:00:00");
+	$("#dropPointNum option[value='1'").attr("selected","selected");
+	//后台从session中读取grid等信息返回给前台
+	$.ajax({
+		type : "GET",
+		async : false,
+		charset : "UTF-8",
+		url : '/Paper/predictionServlet',
+		data : 'type=reGetRegion',
+		dataType : "json",
+		error : function() {
+			alert("失败");
+		},
+		success : function(data) {
+			for (var i = 0; i < data.length; i++) {
+				var zoneStr = data[i]['recZoneStr'];
+				var pointslnglat = zoneStr.split(',');
+				var polygonArr = new Array();// 多边形覆盖物节点坐标数组
+				polygonArr.push([ pointslnglat[0], pointslnglat[1] ]);
+				polygonArr.push([ pointslnglat[2], pointslnglat[3] ]);
+				polygonArr.push([ pointslnglat[4], pointslnglat[5] ]);
+				polygonArr.push([ pointslnglat[6], pointslnglat[7] ]);
+				var polygon = new AMap.Polygon({
+					path : polygonArr,// 设置多边形边界路径
+					strokeColor : "#FF33FF", // 线颜色
+					strokeOpacity : 0.2, // 线透明度
+					strokeWeight : 2, // 线宽
+					fillColor : "#C2D8F8", // 填充色
+					fillOpacity : 0.35
+				// 填充透明度
+				});
+				polygon.on("click",function(e) {// 区域点击响应
+					if (hasGetRegion) {
+						var lng = e.lnglat.getLng();
+						var lat = e.lnglat.getLat();
+						var positionNumSet = $('#dropPointNum').val();// 已知位置点数，可能是1,2
+						if (hisMarkNum >= positionNumSet) {// 已经设置完成
+
+						} else {
+							if (hisMarkNum == 0) {// 设置第1个
+								hisMarkNum = hisMarkNum + 1;
+								markerPositions = markerPositions + lng +","+lat+";";//先存放第一个
+								var marker = new AMap.Marker({
+									icon : "source/img/mark_1.png",
+									position : [lng,lat]
+								});
+								marker.setMap(map);
+							} else if (hisMarkNum == 1) {// 设置第2个
+								hisMarkNum = hisMarkNum + 1;
+								markerPositions = markerPositions + lng +","+lat+";";//再存放第二个
+								var marker = new AMap.Marker({
+									icon : "source/img/mark_2.png",
+									position : [lng,lat]
+								});
+								marker.setMap(map);
+							} else if (hisMarkNum == 2) {// 设置第3个
+								hisMarkNum = hisMarkNum + 1;
+								markerPositions = markerPositions + lng +","+lat+";";
+								var marker = new AMap.Marker({
+									icon : "source/img/mark_3.png",
+									position : [lng,lat]
+								});
+								marker.setMap(map);
+							}
+						}
+					}
+				});
+				polygon.setMap(map);
+			}
+			hasGetRegion = true;
 		}
 	});
 }
