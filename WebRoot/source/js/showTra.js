@@ -160,7 +160,7 @@ function submitOnClick() {
 				}
 			}
 			
-//		    map.setFitView();
+		    map.setFitView();
 		}
 	});
 }
