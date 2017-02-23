@@ -6,7 +6,8 @@ public class Parameter {
 	//参数改为格子的边长
 	//增加grid的边上有几个格子这个参数，为奇数。
 	public static final double cellWidth = 0.5;//cell边长，单位公里，cell是正方形
-	public static final int gridWidth = 7;//grid每个边的cell数，grid是正方形。大于0小于100。前台展示和后台测试都是用的这个参数
+	public static final int gridWidth = 9;//grid每个边的cell数，grid是正方形。大于0小于100。前台展示和后台测试都是用的这个参数
+	public static final int MAXREGIONWIDTH = 3;//region的最大长度
 	/*					(lng,lat+0.02)
 	 * 					
 	 * 
@@ -17,7 +18,7 @@ public class Parameter {
 	 */
 	public static final int leastPointNumInCell = 1;//聚合为region时，cell内的最小有效点数（含）。小于这个值将被舍弃
 	public static final int leastPointNumInTra = 5;//轨迹最少点数，小于此值的轨迹将被舍弃
-	public static final int periodOfHalfLift = 3;//半衰期有效系数的周期，3天
+	public static final int periodOfHalfLift = 30;//半衰期有效系数的周期，3天
 	public static final double coefficientOfHalfLift = 1.0;//半衰期有效系数的系数
 	
 	//测试用参数

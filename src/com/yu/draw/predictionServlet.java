@@ -82,6 +82,12 @@ public class predictionServlet extends HttpServlet {
 			}
 			//得到regions
 			LinkedList<Region> regionList = GridUtil.getRegionListByPointNum(numArr, originGps);
+			//测试输出regionlist
+			System.out.println("out");
+			for(Region region:regionList){
+				System.out.println(region);
+			}
+			
 			//每条轨迹对应的regionTra
 			ArrayList<ArrayList<RegionTime>> regionTraList = GridUtil.cellTraList2RegionTraList(cellTraList, regionList);
 			//regionTraList => modelMap
@@ -91,13 +97,13 @@ public class predictionServlet extends HttpServlet {
 			//测试输出modelMap
 			System.out.println("modelMap:"+modelMap.size());
 			for(Region region:modelMap.keySet()){
-				System.out.print(region+">>");
+//				System.out.print(region+">>");
 				ArrayList<RegionModel> regionModelList = modelMap.get(region);
-				System.out.print("models:"+regionModelList.size()+">>");
+//				System.out.print("models:"+regionModelList.size()+">>");
 				for(RegionModel rm:regionModelList){
 					System.out.print(rm);
 				}
-				System.out.println("\n");
+//				System.out.println("\n");
 			}
 			// grid区域
 			RectangleZone rz = new RectangleZone(lu_lng, lu_lat, rd_lng, rd_lat);

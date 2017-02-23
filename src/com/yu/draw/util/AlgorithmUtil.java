@@ -109,7 +109,7 @@ public class AlgorithmUtil {
 		if(regionFirst == null){//只知道当前region，不知道上一个region
 			for(RegionModel rm:regionModelList){
 				Region nextRegion = rm.getNext();
-				double score = PredictionUtil.EfficiencyBasedOnHalflife(rm.getNextTime(), time);
+				double score = PredictionUtil.getScoreByTwoTime(rm.getNextTime(), time);
 				if(scoreMap.containsKey(nextRegion)){
 					scoreMap.put(nextRegion, scoreMap.get(nextRegion) + score);//加上新的分数
 				}else{
@@ -121,7 +121,7 @@ public class AlgorithmUtil {
 				Region nextRegion = rm.getNext();
 				Region preRegion = rm.getPre();
 				if(preRegion != null && preRegion.equals(regionFirst)){//两次region都匹配
-					double score = PredictionUtil.EfficiencyBasedOnHalflife(rm.getNextTime(), time);
+					double score = PredictionUtil.getScoreByTwoTime(rm.getNextTime(), time);
 					if(scoreMap.containsKey(nextRegion)){
 						scoreMap.put(nextRegion, scoreMap.get(nextRegion) + score);//加上新的分数
 					}else{

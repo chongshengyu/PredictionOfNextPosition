@@ -114,7 +114,7 @@ public class getTraPoints extends HttpServlet {
 			}
 			ArrayList<ArrayList<GPSPoint>> arrayList = new ArrayList<ArrayList<GPSPoint>>();
 			arrayList.add(points_uncorrected);
-//			points_corrected = TraFilter.getSparsedTra(points_corrected);//过滤
+			points_corrected = TraFilter.getSparsedTra(points_corrected);//过滤
 			arrayList.add(points_corrected);
 //			System.out.println("过滤后长度："+points_corrected.size());//281->19
 			jsonString = JSON.toJSONString(arrayList);

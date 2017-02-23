@@ -11,6 +11,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
+import javax.sound.sampled.Mixer;
+
 import com.yu.draw.entity.Cell;
 import com.yu.draw.entity.GPS;
 import com.yu.draw.entity.GPSCell;
@@ -190,6 +192,7 @@ public class GridUtil {
 
 	/**
 	 * 将cells依次向四个方向extend，若都不能扩展则返回false，否则返回true
+	 * 在每个方向的扩展前，都要判断region长度是否达到限制
 	 * 
 	 * @param cells
 	 *            当前工作区域包含的cells，因为参数是引用类型，在这做的修个可以保存。
@@ -247,6 +250,9 @@ public class GridUtil {
 				// 点数不同或者有被用过的，不能合并
 			}
 		}
+		if(isMaxLength(cells)){//长边达到最大长度
+			return false;
+		}
 		// Down
 		ArrayList<Cell> downCells = findCellsOnDown(cells);// 下边（外部）的cells
 		if (downCells == null) {
@@ -285,6 +291,9 @@ public class GridUtil {
 			} else {
 				// 点数不同或者有被用过的，不能合并
 			}
+		}
+		if(isMaxLength(cells)){//长边达到最大长度
+			return false;
 		}
 		// Left
 		ArrayList<Cell> leftCells = findCellsOnLeft(cells);// 左边（外部）的cells
@@ -705,5 +714,35 @@ public class GridUtil {
 			}
 		}
 		return map;
+	}
+	
+	/**
+	 * 得到用cell list表示的region的长边长度
+	 * @param cells 表示的region
+	 * @return 长边长度
+	 */
+	private static boolean isMaxLength(ArrayList<GridCell> cells){
+		if(cells.size() == 0){
+			return false;
+		}
+		int maxY = 0;
+		int minY = Parameter.gridWidth;
+		int maxX = 0;
+		int minX = Parameter.gridWidth;
+		for(GridCell gc:cells){
+			if(gc.getGridX() > maxX){
+				maxX = gc.getGridX();
+			}
+			if(gc.getGridX() < minX){
+				minX = gc.getGridX();
+			}
+			if(gc.getGridY() > maxY){
+				maxY = gc.getGridY();
+			}
+			if(gc.getGridY() < minY){
+				minY = gc.getGridY();
+			}
+		}
+		return Math.max(maxY - minY, maxX - minX) >= (Parameter.MAXREGIONWIDTH - 1);
 	}
 }
