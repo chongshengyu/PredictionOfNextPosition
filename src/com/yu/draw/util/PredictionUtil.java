@@ -56,12 +56,22 @@ public class PredictionUtil {
 			e.printStackTrace();
 		}
 		int days = ((int)(dateD.getTime() - dateI.getTime()))/(24*60*60*1000);
-		result1 = Parameter.coefficientOfHalfLift * Math.pow(0.5, days/Parameter.periodOfHalfLift);
+//		result1 = Parameter.coefficientOfHalfLift * Math.pow(0.5, days/Parameter.periodOfHalfLift);
+		result1 = 1;
 		//相似性
 		String hourI = ""+dateI.getHours();
 		String hourD = ""+dateD.getHours();
 		double diff = Math.abs(Integer.parseInt(hourI) - Integer.parseInt(hourD)) > 12 ? 24 - Math.abs(Integer.parseInt(hourI) - Integer.parseInt(hourD)) : Math.abs(Integer.parseInt(hourI) - Integer.parseInt(hourD));
 		result2 = 1 - diff / 12;
-		return result1;
+		return result2;
+	}
+	
+	public static double keep2bit(double src){
+		String s = String.valueOf(src);
+		String out = s;
+		if(s.split("\\.")[1].length()>2){
+			out = s.split("\\.")[0]+"."+s.split("\\.")[1].substring(0, 2);
+		}
+		return Double.parseDouble(out);
 	}
 }

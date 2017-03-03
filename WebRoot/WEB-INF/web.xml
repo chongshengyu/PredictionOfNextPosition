@@ -25,6 +25,16 @@
     <servlet-name>predictionServlet</servlet-name>
     <servlet-class>com.yu.draw.predictionServlet</servlet-class>
   </servlet>
+  <servlet>
+    <servlet-name>EvaAlgoriTestServlet</servlet-name>
+    <servlet-class>com.yu.evaluation.EvaAlgoriTestServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>EvaAlgoriTestServlet2</servlet-name>
+    <servlet-class>com.yu.evaluation.EvaAlgoriTestServlet2</servlet-class>
+  </servlet>
+
+
 
 
 
@@ -54,6 +64,14 @@
   <servlet-mapping>
     <servlet-name>predictionServlet</servlet-name>
     <url-pattern>/predictionServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>EvaAlgoriTestServlet</servlet-name>
+    <url-pattern>/EvaAlgoriTestServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>EvaAlgoriTestServlet2</servlet-name>
+    <url-pattern>/EvaAlgoriTestServlet2</url-pattern>
   </servlet-mapping>
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>

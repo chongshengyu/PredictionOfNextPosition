@@ -79,6 +79,10 @@ function nextOnClick(){
 function setFitViewOnClick(){
 	map.setFitView();
 }
+//输出轨迹号
+function outputTraNo(){
+	console.log($('#dropTid').val());
+}
 // 点击确定的响应
 function submitOnClick() {
 	// 获取纠偏后的位置点，或者纠偏前后的位置点

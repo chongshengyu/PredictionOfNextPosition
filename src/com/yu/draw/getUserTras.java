@@ -56,6 +56,7 @@ public class getUserTras extends HttpServlet {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		JdbcUtil.close(conn, stmt);
 	}
 
 }

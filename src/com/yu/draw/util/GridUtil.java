@@ -79,7 +79,7 @@ public class GridUtil {
 		return cellList;
 	}
 
-	// 由GPS得到GPSCell
+	// 由GPS得到GPSCell，注意，这个originGps是grid左下角坐标
 	public static GPSCell GPSToGPSCell(GPSPoint gps, GPS originGps) {
 		String gpsLng = gps.getLang();
 		String gpsLat = gps.getLat();
