@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>预测结果(测试集筛选)</title>
+<meta name="content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport"
+	content="initial-scale=1.0, user-scalable=no, width=device-width">
+<script src="source/js/jquery.min.js"></script>
+<script src="http://webapi.amap.com/maps?v=1.3&key=您申请的key值"></script>
+<link rel="stylesheet" type="text/css" href="source/css/showTra.css" />
+</head>
+  
+<body>
+	<div id="container"></div>
+	<div class='button-group'
+		style="right: auto; filter: alpha(opacity=95); -moz-opacity: 0.95; -khtml-opacity: 0.95; opacity: 0.95;">
+		<div id="header">
+			<div id="panel">
+				<div id='selectUserId'>
+				使用训练集对测试集中的轨迹进行测试</br>
+				训练集使用全部轨迹，测试集使用手工筛选的数据</br>
+					测试用户
+					<select id='dropUid' onchange='useridOnchange()'></select> 
+					测试轨迹
+					<select id='dropTid'></select>
+					<input type="button" value="显示实际轨迹" onclick="submitOnClick()">
+					<input type="button" value="下一条" onclick="nextOnClick()">
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script src="source/js/predictionTest2.js"></script>
+</html>
