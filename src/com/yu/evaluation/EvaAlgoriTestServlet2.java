@@ -28,6 +28,7 @@ import com.yu.draw.entity.RegionModel;
 import com.yu.draw.entity.RegionTime;
 import com.yu.draw.util.GridUtil;
 import com.yu.draw.util.TraFilter;
+import com.yu.evaluation.entity.ResultScores;
 import com.yu.evaluation.util.TraUtil;
 import com.yu.prepare.util.JdbcUtil;
 
@@ -227,24 +228,11 @@ public class EvaAlgoriTestServlet2 extends HttpServlet {
 			//session中的modelMap
 			@SuppressWarnings("unchecked")
 			HashMap<Region, ArrayList<RegionModel>> modelMap = (HashMap<Region, ArrayList<RegionModel>>)request.getSession().getAttribute("modelMap");
-			//测试输出
-			/*for(Region region:modelMap.keySet()){
-				System.out.println(region);
-				for(RegionModel rm:modelMap.get(region)){
-					System.out.println(rm);
-				}
-			}*/
-			
-			HashMap<Region, Double> scoreMap = TraUtil.getScoreMap(gpsList, originGps, time, modelMap);
-			//测试输出
-			/*for(Region region:scoreMap.keySet()){
-				System.out.println(region);
-				System.out.println(scoreMap.get(region));
-			}*/
+			HashMap<Region, ResultScores> scoreMap = TraUtil.getScoreMap(gpsList, originGps, time, modelMap);
 			ArrayList<RectangleZoneWithScore> rectangleScoreList = new ArrayList<RectangleZoneWithScore>();
 			if(scoreMap !=null){
 				for(Region region:scoreMap.keySet()){
-					rectangleScoreList.add(new RectangleZoneWithScore(region.getLuGps().getLongitude(), region.getLuGps().getLatitude(), region.getRdGps().getLongitude(), region.getRdGps().getLatitude(), ""+scoreMap.get(region)));
+					rectangleScoreList.add(new RectangleZoneWithScore(region.getLuGps().getLongitude(), region.getLuGps().getLatitude(), region.getRdGps().getLongitude(), region.getRdGps().getLatitude(), ""+scoreMap.get(region).getMyScore()));
 				}
 			}//scoreMap为空，无法预测
 			String result = JSON.toJSONString(rectangleScoreList);

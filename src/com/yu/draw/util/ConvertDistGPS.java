@@ -52,4 +52,46 @@ public class ConvertDistGPS {
 //	    System.out.println(distance);
 		return distance;
 	}
+	
+	//已知经纬度求方向角
+	/**
+	 * 由pntFirst向pntNext画有向线段，其方向与正北方向的顺时针夹角。范围0-360度
+	 * @param pntFirst
+	 * @param pntNext
+	 * @return
+	 */
+	public static double GetAngle(GPS pntFirst, GPS pntNext)
+	{
+	    double dRotateAngle = Math.atan2(Math.abs(Double.parseDouble(pntFirst.getLongitude()) - Double.parseDouble(pntNext.getLongitude())), Math.abs(Double.parseDouble(pntFirst.getLatitude()) - Double.parseDouble(pntNext.getLatitude())));
+	    if (Double.parseDouble(pntNext.getLongitude()) >= Double.parseDouble(pntFirst.getLongitude()))
+	    {
+	        if (Double.parseDouble(pntNext.getLatitude()) >= Double.parseDouble(pntFirst.getLatitude()))
+	        {
+	        
+	        }
+	        else
+	        {
+	            dRotateAngle = Math.PI - dRotateAngle;
+	        }
+	    }
+	    else{
+	        if (Double.parseDouble(pntNext.getLatitude()) >= Double.parseDouble(pntFirst.getLatitude()))
+	        {
+	            dRotateAngle = 2 * Math.PI - dRotateAngle;
+	        }
+	        else
+	        {
+	            dRotateAngle = Math.PI + dRotateAngle;
+	        }
+	    }
+	    dRotateAngle = dRotateAngle * 180 / Math.PI;
+	    return dRotateAngle;
+	}
+	public static void main(String[] args){
+		//117.554719	36.700073
+		//117.554692	36.699548
+		GPS pntFirst = new GPS("117.554692","36.699548");
+		GPS pntNext = new GPS("117.554386", "36.700271");
+		System.out.println(GetAngle(pntFirst, pntNext));
+	}
 }

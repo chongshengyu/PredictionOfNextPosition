@@ -19,6 +19,7 @@ import com.yu.draw.entity.RegionModel;
 import com.yu.draw.entity.RegionTime;
 import com.yu.draw.util.GridUtil;
 import com.yu.draw.util.TraFilter;
+import com.yu.evaluation.entity.ResultScores;
 import com.yu.evaluation.entity.TestUser;
 import com.yu.evaluation.util.TraUtil;
 import com.yu.prepare.util.JdbcUtil;
@@ -76,17 +77,21 @@ public class EvaAlgoriOne_1 {
 		for(TestUser testUser:testUserList){
 			//计数
 			System.out.println("user："+testUser.getUserId()+";traCnt:"+testUser.getEffectiveTraNo().size());
-			int userSuccess = 0;//预测正确
-			int userWrong = 0;//预测错误
+			int userSuccessMy = 0;//预测正确
+			int userWrongMy = 0;//预测错误
+			int userSuccessRef = 0;//预测正确
+			int userWrongRef = 0;//预测错误
 			int userUnablePredictin = 0;//无法预测
 			
 			//随机选取测试集
 			ArrayList<String> testTraNoList = new ArrayList<String>();//随机选出的测试轨迹号
-			for(int i=0;i<testUser.getEffectiveTraNo().size() * (1 - Parameter.PROP_OF_SAMPLE_SET);i++){//随机种子26
-				int testTraIndex = new Random(26).nextInt(testUser.getEffectiveTraNo().size() / 2) + (testUser.getEffectiveTraNo().size() / 2) - 1;//选中的测试集索引
+			for(int i=0;i<testUser.getEffectiveTraNo().size() * (1 - Parameter.PROP_OF_SAMPLE_SET);i++){//调试时可以指定，随机种子26，以生成同一个轨迹
+				int testTraIndex = new Random().nextInt(testUser.getEffectiveTraNo().size() / 2) + (testUser.getEffectiveTraNo().size() / 2) - 1;//选中的测试集索引
 				testTraNoList.add(testUser.getEffectiveTraNo().get(testTraIndex));
 			}
 			System.out.println("testTraCnt:"+testTraNoList.size());
+			/*for(String testTraNo:testTraNoList)
+				System.out.println(testTraNo);*/
 			//对每个测试轨迹进行测试
 			for(String testTraNo:testTraNoList){
 				//得到与当前测试轨迹对应的训练集轨迹号
@@ -101,8 +106,10 @@ public class EvaAlgoriOne_1 {
 				//以01320081209230723为第一条测试·································································
 //				testTraNo = "01320081209230723";
 				System.out.println("current tra:"+testTraNo);
-				int traSuccess = 0;//预测正确
-				int traWrong = 0;//预测错误
+				int traSuccessMy = 0;//预测正确
+				int traWrongMy = 0;//预测错误
+				int traSuccessRef = 0;//预测正确
+				int traWrongRef = 0;//预测错误
 				int traUnablePredictin = 0;//无法预测
 				conn = null;
 				stmt = null;
@@ -122,7 +129,7 @@ public class EvaAlgoriOne_1 {
 				JdbcUtil.close(conn, stmt);
 				testTraGpsPoints = TraFilter.getSparsedTra(testTraGpsPoints);//得到稀疏后的轨迹
 				for(GPSPoint gpsPoint:testTraGpsPoints){
-					//对于每个gps点进行测试
+					//对于测试轨迹中的每个gps点进行测试
 					//得到Grid左上角和右下角坐标
 					GPS gpsCenter = new GPS(gpsPoint.getLang(), gpsPoint.getLat());
 					String lu_lng = GridUtil.getGridLUGpsByCenter(gpsCenter).getLongitude();
@@ -130,8 +137,8 @@ public class EvaAlgoriOne_1 {
 					String rd_lng = GridUtil.getGridRDGpsByCenter(gpsCenter).getLongitude();
 					String rd_lat = GridUtil.getGridRDGpsByCenter(gpsCenter).getLatitude();
 					//得到Grid原点坐标
-					GPS originGps = GridUtil.getGridOriginGpsByCenter(gpsCenter);//边长可以改小一点
-					//grid内的训练轨迹集，内部也做了同样的稀疏
+					GPS originGps = GridUtil.getGridOriginGpsByCenter(gpsCenter);
+					//grid内的训练轨迹集，内部也做了同样的轨迹过滤
 					ArrayList<ArrayList<GPSPoint>> traList = TraUtil.getTraInGrid(testUser.getUserId(), lu_lng, lu_lat, rd_lng, rd_lat,trainTraNoList);
 					if(traList.size() == 0){
 						System.out.println("该点附近没有历史轨迹");
@@ -140,10 +147,11 @@ public class EvaAlgoriOne_1 {
 					//将轨迹转换成cell序列
 					ArrayList<ArrayList<GPSCell>> cellTraList = new ArrayList<ArrayList<GPSCell>>();
 					for(ArrayList<GPSPoint> tra:traList){
-						ArrayList<GPSCell> cellTra = GridUtil.GPSTraToCellTra(tra, originGps);
+						ArrayList<GPSCell> cellTra = GridUtil.GPSTraToCellTra(tra, originGps);//这里没有实现插值，是否有影响？？
 						cellTraList.add(cellTra);
 					}
-					//得到int[][] numArr
+					
+					//得到regions
 					int[][] numArr = new int[Parameter.gridWidth][Parameter.gridWidth];
 					for(ArrayList<GPSCell> cellTra:cellTraList){
 						for(GPSCell cell:cellTra){
@@ -152,8 +160,8 @@ public class EvaAlgoriOne_1 {
 							numArr[x][y] += 1;
 						}
 					}
-					//得到regions
 					LinkedList<Region> regionList = GridUtil.getRegionListByPointNum(numArr, originGps);
+					
 					//每条轨迹对应的regionTra
 					ArrayList<ArrayList<RegionTime>> regionTraList = GridUtil.cellTraList2RegionTraList(cellTraList, regionList);
 					//regionTraList => modelMap
@@ -163,18 +171,26 @@ public class EvaAlgoriOne_1 {
 					knownGpsPoint.add(new GPS(gpsPoint.getLang(),gpsPoint.getLat()));
 
 					//根据历史数据得到的regions里不能包含当前待预测的点怎么办????????????????????????????????
-					HashMap<Region, Double> scoreMap = TraUtil.getScoreMap(knownGpsPoint, originGps, time, modelMap);
+					HashMap<Region, ResultScores> scoreMap = TraUtil.getScoreMap(knownGpsPoint, originGps, time, modelMap);//设置不同算法，得到不同分数
 					if(scoreMap == null){
 						traUnablePredictin ++;
 						continue;
 					}
 					//找到分值最大的region????这个地方，有时候不连续？？？？？
-					Region predictionRegion = null;
-					double scoreMax = 0.0;
+					Region predictionRegionMy = null;
+					Region predictionRegionRef = null;
+					double scoreMaxMy = 0.0;
+					double scoreMaxRef = 0.0;
 					for(Region region:scoreMap.keySet()){
-						if((double)scoreMap.get(region) > scoreMax){
-							predictionRegion = region;
-							scoreMax = (double)scoreMap.get(region);
+						//我的算法得分
+						if((double)scoreMap.get(region).getMyScore() > scoreMaxMy){
+							predictionRegionMy = region;
+							scoreMaxMy = (double)scoreMap.get(region).getMyScore();
+						}
+						//参考算法得分
+						if((double)scoreMap.get(region).getRefScore() > scoreMaxRef){
+							predictionRegionRef = region;
+							scoreMaxRef = (double)scoreMap.get(region).getRefScore();
 						}
 					}
 					//判断预测是否正确
@@ -205,17 +221,26 @@ public class EvaAlgoriOne_1 {
 						traUnablePredictin ++;
 						continue;
 					}
-					if(regionTra.get(1).getRegion().equals(predictionRegion)){//正确
-						userSuccess ++;
-						traSuccess ++;
+					if(regionTra.get(1).getRegion().equals(predictionRegionMy)){//正确
+						userSuccessMy ++;
+						traSuccessMy ++;
 					}else{//错误
-						userWrong ++;
-						traWrong ++;
+						userWrongMy ++;
+						traWrongMy ++;
+					}
+					if(regionTra.get(1).getRegion().equals(predictionRegionRef)){//正确
+						userSuccessRef ++;
+						traSuccessRef ++;
+					}else{//错误
+						userWrongRef ++;
+						traWrongRef ++;
 					}
 				}
-				System.out.println("tra:"+testTraNo+",success:"+traSuccess+",wrong:"+traWrong+",unable:"+traUnablePredictin);
+				System.out.println("traMy:"+testTraNo+",successMy:"+traSuccessMy+",wrongMy:"+traWrongMy+",unable:"+traUnablePredictin);
+				System.out.println("traRef:"+testTraNo+",successRef:"+traSuccessRef+",wrongRef:"+traWrongRef+",unable:"+traUnablePredictin);
 			}
-			System.out.println("user:"+testUser.getUserId()+",success:"+userSuccess+",wrong:"+userWrong+",unable:"+userUnablePredictin);
+			System.out.println("userMy:"+testUser.getUserId()+",successMy:"+userSuccessMy+",wrongMy:"+userWrongMy+",unable:"+userUnablePredictin);
+			System.out.println("userRef:"+testUser.getUserId()+",successRef:"+userSuccessRef+",wrongRef:"+userWrongRef+",unable:"+userUnablePredictin);
 		}
 	}
 	

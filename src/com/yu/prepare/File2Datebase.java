@@ -59,8 +59,9 @@ public class File2Datebase {
 		new Thread() {
 			public void run() {
 				DataAccess dataAccess = new DataAccess();
-				for (int i = 60; i < 70; i++) {
-					String userId = "0" + String.valueOf(i);
+				for (int i = 120; i < 130; i++) {
+					String userId = String.valueOf(i);
+//					String userId = "0" + String.valueOf(i);
 					try {
 						SigleFileImport(userId,dataAccess);
 					} catch (IOException e) {
@@ -74,8 +75,9 @@ public class File2Datebase {
 		new Thread(){
 			public void run() {
 				DataAccess dataAccess = new DataAccess();
-				for (int i = 70; i < 80; i++) {
-					String userId = "0" + String.valueOf(i);
+				for (int i = 130; i < 140; i++) {
+					String userId = String.valueOf(i);
+//					String userId = "0" + String.valueOf(i);
 					try {
 						SigleFileImport(userId,dataAccess);
 					} catch (IOException e) {
@@ -89,8 +91,9 @@ public class File2Datebase {
 		new Thread(){
 			public void run() {
 				DataAccess dataAccess = new DataAccess();
-				for (int i = 80; i < 90; i++) {
-					String userId = "0" + String.valueOf(i);
+				for (int i = 140; i < 150; i++) {
+					String userId = String.valueOf(i);
+//					String userId = "0" + String.valueOf(i);
 					try {
 						SigleFileImport(userId,dataAccess);
 					} catch (IOException e) {

@@ -22,6 +22,7 @@ import com.yu.draw.util.GridUtil;
 import com.yu.draw.util.JdbcUtil;
 import com.yu.draw.util.PredictionUtil;
 import com.yu.draw.util.TraFilter;
+import com.yu.evaluation.entity.ResultScores;
 
 public class TraUtil {
 	/**
@@ -89,7 +90,7 @@ public class TraUtil {
 						traNumTmp = rs.getString("TraNum");
 						continue;
 					}
-					pointList = TraFilter.getSparsedTra(pointList);// 稀疏
+					pointList = TraFilter.getSparsedTra(pointList);// 轨迹过滤
 					traList.add(pointList);
 					pointList = new ArrayList<GPSPoint>();
 					traNumTmp = rs.getString("TraNum");
@@ -111,14 +112,7 @@ public class TraUtil {
 	 * @param modelMap 该用户的模型
 	 * @return 预测结果
 	 */
-	public static HashMap<Region, Double> getScoreMap(ArrayList<GPS> gpsList,GPS originGps, String time,HashMap<Region, ArrayList<RegionModel>> modelMap){
-		//测试输出
-		/*for(Region region:modelMap.keySet()){
-			System.out.println(region);
-			for(RegionModel rm:modelMap.get(region)){
-				System.out.println(rm);
-			}
-		}*/
+	public static HashMap<Region, ResultScores> getScoreMap(ArrayList<GPS> gpsList,GPS originGps, String time,HashMap<Region, ArrayList<RegionModel>> modelMap){
 		GPSCell cellFirst = null;
 		GPSCell cellSecond = null;
 		Region regionFirst = null;
@@ -139,7 +133,7 @@ public class TraUtil {
 				return null;
 			}
 		}else if(gpsList.size() == 2){//知道两点
-			cellFirst = GridUtil.GPSToGPSCell(new GPSPoint(gpsList.get(0).getLongitude(),gpsList.get(0).getLatitude(),time), originGps);
+			/*cellFirst = GridUtil.GPSToGPSCell(new GPSPoint(gpsList.get(0).getLongitude(),gpsList.get(0).getLatitude(),time), originGps);
 			cellSecond = GridUtil.GPSToGPSCell(new GPSPoint(gpsList.get(1).getLongitude(),gpsList.get(1).getLatitude(),time), originGps);
 			//GPSCell还需要转成GridCell
 			GridCell gridCellSecond = new GridCell(cellSecond.getGridX(), cellSecond.getGridY(), originGps);
@@ -155,26 +149,28 @@ public class TraUtil {
 				if(regionFirst != null && regionSecond != null){
 					break;
 				}
-			}
+			}*/
 		}
+		//regionSecond的regionModelList
 		ArrayList<RegionModel> regionModelList = modelMap.get(regionSecond);//regionSecond是当前预测时所在的region
-		HashMap<Region, Double> scoreMap = new HashMap<Region, Double>();//下一个region的scoreMap
+		HashMap<Region, ResultScores> scoreMap = new HashMap<Region, ResultScores>();//下一个region的scoreMap
 		//先把所有region的打分初始化为0
 		for(Region region:modelMap.keySet()){
-			scoreMap.put(region, 0.0);
+			scoreMap.put(region, new ResultScores(0.0, 0.0));
 		}
 		if(regionFirst == null){//只知道当前region，不知道上一个region
 			for(RegionModel rm:regionModelList){
 				Region nextRegion = rm.getNext();
-				double score = PredictionUtil.getScoreByTwoTime(rm.getNextTime(), time);
+				double myScore = PredictionUtil.getScoreByTwoTime(rm.getNextTime(), time);
 				if(scoreMap.containsKey(nextRegion)){
-					scoreMap.put(nextRegion, PredictionUtil.keep2bit(scoreMap.get(nextRegion) + score));//加上新的分数
+					//PredictionUtil.keep2bit(scoreMap.get(nextRegion) + score)
+					scoreMap.put(nextRegion, new ResultScores(scoreMap.get(nextRegion).getMyScore()+myScore, scoreMap.get(nextRegion).getRefScore()+1));//加上新的分数
 				}else{
-					scoreMap.put(nextRegion, score);
+					scoreMap.put(nextRegion, new ResultScores(myScore, 1));
 				}
 			}
 		}else{//知道当前region和上一个region
-			for(RegionModel rm:regionModelList){
+			/*for(RegionModel rm:regionModelList){
 				Region nextRegion = rm.getNext();
 				Region preRegion = rm.getPre();
 				if(preRegion != null && preRegion.equals(regionFirst)){//两次region都匹配
@@ -187,7 +183,7 @@ public class TraUtil {
 				}else{//不计算只匹配一次的情况
 					
 				}
-			}
+			}*/
 		}
 		return scoreMap;
 	}

@@ -20,6 +20,7 @@ import com.yu.draw.util.GridUtil;
 import com.yu.draw.util.JdbcUtil;
 import com.yu.draw.util.StringUtil;
 import com.yu.draw.util.TraFilter;
+import com.yu.evaluation.entity.ResultScores;
 import com.yu.evaluation.entity.TestUser;
 import com.yu.evaluation.util.TraUtil;
 
@@ -158,7 +159,7 @@ public class EvaAlgoriOne {
 					knownGpsPoint.add(new GPS(gpsPoint.getLang(),gpsPoint.getLat()));
 
 					//根据历史数据得到的regions里不能包含当前待预测的点怎么办????????????????????????????????
-					HashMap<Region, Double> scoreMap = TraUtil.getScoreMap(knownGpsPoint, originGps, time, modelMap);
+					HashMap<Region, ResultScores> scoreMap = TraUtil.getScoreMap(knownGpsPoint, originGps, time, modelMap);
 					if(scoreMap == null){
 //						System.out.println("无法预测");
 						traUnablePredictin ++;
@@ -168,9 +169,9 @@ public class EvaAlgoriOne {
 					Region predictionRegion = null;
 					double scoreMax = 0.0;
 					for(Region region:scoreMap.keySet()){
-						if((double)scoreMap.get(region) > scoreMax){
+						if((double)scoreMap.get(region).getMyScore() > scoreMax){
 							predictionRegion = region;
-							scoreMax = (double)scoreMap.get(region);
+							scoreMax = (double)scoreMap.get(region).getMyScore();
 						}
 					}
 					//判断预测是否正确
@@ -227,7 +228,7 @@ public class EvaAlgoriOne {
 	}
 	
 	public static void main(String[] args) {
-		testOne();
+//		testOne();
 	}
 
 }

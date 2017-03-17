@@ -10,12 +10,6 @@ import java.util.Date;
 import com.yu.draw.entity.Parameter;
 
 public class PredictionUtil {
-	/**
-	 * 基于半衰期的数据有效性计算
-	 * @param timeI 待计算有效性的数据获取时间，较早
-	 * @param timeD 设定的“当前”预测时的时间，较晚
-	 * @return 基于半衰期的有效性系数
-	 */
 	/*public static double EfficiencyBasedOnHalflife(String timeI, String timeD){
 		double result = 0.0;
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -39,7 +33,13 @@ public class PredictionUtil {
 		nf.setRoundingMode(RoundingMode.UP);
 		return Double.parseDouble(nf.format(result));
 	}*/
-	
+
+	/**
+	 * 基于半衰期的数据有效性计算
+	 * @param timeI 待计算有效性的数据获取时间，较早
+	 * @param timeD 设定的“当前”预测时的时间，较晚
+	 * @return 基于半衰期的有效性系数
+	 */
 	public static double getScoreByTwoTime(String timeI, String timeD){
 		double result = 0.0;
 		double result1 = 0.0;//有效性

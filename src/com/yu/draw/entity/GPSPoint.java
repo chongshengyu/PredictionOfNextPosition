@@ -29,4 +29,9 @@ public class GPSPoint {
 		this.dateTime = dateTime;
 	}
 	
+	@Override
+	public String toString() {
+		//
+		return lang+";"+lat+";"+dateTime;
+	}
 }

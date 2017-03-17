@@ -1,6 +1,7 @@
 var map = new AMap.Map("container", {
 	resizeEnable : true,
 	zoom : 17,
+	//lang: 'en',
 });
 
 // 填充useId下拉框
@@ -92,6 +93,7 @@ function submitOnClick() {
 	var corrected = 0;
 	var uncorrected = 0;
 	var correctedAll = 0;
+	var filted = 0;
 	if($('#chkAllCorrected').is(':checked')){
 		correctedAll = 1;
 	}
@@ -101,12 +103,15 @@ function submitOnClick() {
 	if($('#chkCorrected').is(':checked')){
 		corrected = 1;
 	}
+	if($('#chkFilted').is(':checked')){
+		filted = 1;
+	}
 	$.ajax({
 		type : "GET",
 		async : false,
 		charset : "UTF-8",
 		url : '/Paper/getTraPoints',
-		data : "correctedAll="+correctedAll+"&corrected="+corrected+"&uncorrected="+uncorrected+"&userid="+userid+"&traid="+traid,// corrected:纠偏后的数据，uncorrected：纠偏前的数据
+		data : "filted="+filted+"&correctedAll="+correctedAll+"&corrected="+corrected+"&uncorrected="+uncorrected+"&userid="+userid+"&traid="+traid,// corrected:纠偏后的数据，uncorrected：纠偏前的数据
 		dataType : "json",
 		error : function() {
 			alert("失败");
@@ -133,14 +138,43 @@ function submitOnClick() {
 				if(corrected == 1){//指定的纠偏后的某一条轨迹
 					var lineArr = [];
 					var out = data;
+					
+					//起点
+					var marker = new AMap.Marker({
+			            icon: "source/img/start.png",
+			            position: [out[1][1]['lang'], out[1][1]['lat']],
+						offset:new AMap.Pixel(-16, -16),
+						title:out[1][1]['dateTime'],
+						extData:out[1][1]['dateTime'],
+			        });
+			        marker.setMap(map);
+			        //终点
+			        var marker = new AMap.Marker({
+			            icon: "source/img/end.png",
+			            position: [out[1][out[1].length-1]['lang'], out[1][out[1].length-1]['lat']],
+						offset:new AMap.Pixel(-16, -16),
+						title:out[1][out[1].length-1]['dateTime'],
+						extData:out[1][out[1].length-1]['dateTime'],
+			        });
+			        marker.setMap(map);
+			        
 					for(var i=0;i<out[1].length;i++){
 						lineArr[lineArr.length] = [out[1][i]['lang'],out[1][i]['lat']];
+						//可以临时注释
+						/*var marker = new AMap.Marker({
+				            icon: "source/img/circle.png",
+				            position: [out[1][i]['lang'], out[1][i]['lat']],
+							offset:new AMap.Pixel(-3, -3),
+							title:out[1][i]['dateTime'],
+							extData:out[1][i]['dateTime'],
+				        });
+				        marker.setMap(map);*/
 					}
 				    var polyline = new AMap.Polyline({
 				        path: lineArr,          //设置线覆盖物路径
 				        strokeColor: "#3366FF", //线颜色
 				        strokeOpacity: 1,       //线透明度
-				        strokeWeight: 5,        //线宽
+				        strokeWeight: 2,        //线宽
 				        strokeStyle: "solid",   //线样式
 				        strokeDasharray: [10, 5] //补充线样式
 				    });
@@ -158,6 +192,31 @@ function submitOnClick() {
 				        strokeOpacity: 1,       //线透明度
 				        strokeWeight: 5,        //线宽
 				        strokeStyle: "solid",   //线样式
+				        strokeDasharray: [10, 5] //补充线样式
+				    });
+				    polyline.setMap(map);
+				}
+				if(filted == 1){//指定的过滤后的某一条轨迹
+					var lineArr = [];
+					var out = data;
+					for(var i=0;i<out[2].length;i++){
+						lineArr[lineArr.length] = [out[2][i]['lang'],out[2][i]['lat']];
+					    //可以临时注释
+						var marker = new AMap.Marker({
+				            icon: "source/img/circle.png",
+				            position: [out[2][i]['lang'], out[2][i]['lat']],
+							offset:new AMap.Pixel(-3, -3),
+							title:out[2][i]['dateTime']+";"+out[2][i]['lang']+";"+out[2][i]['lat'],
+							extData:out[2][i]['dateTime'],
+				        });
+				        marker.setMap(map);
+					}
+				    var polyline = new AMap.Polyline({
+				        path: lineArr,          //设置线覆盖物路径
+				        strokeColor: "#34AA4B", //线颜色
+				        strokeOpacity: 1,       //线透明度
+				        strokeWeight: 2,        //线宽
+				        strokeStyle: "dashed",   //线样式
 				        strokeDasharray: [10, 5] //补充线样式
 				    });
 				    polyline.setMap(map);

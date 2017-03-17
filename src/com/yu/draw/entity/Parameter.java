@@ -16,6 +16,13 @@ public class Parameter {
 	 * 
 	 * 					 (lng,lat-0.02)
 	 */
+	//轨迹过滤参数
+	public static final double LAMDA_DISTANCE = 65;//过滤重复点的参数，单位m，小于此值的点认为是重复点 
+	public static final int LAMDA_WINDOW_INIT_LENGTH = 10;//轨迹朝向滑动窗口初始宽度，单位点数
+	public static final int LAMDA_WINDOW_HEIGHT = 60;//滑动窗口高度，单位度
+	public static final int LAMDA_TRIANGLE_FILTER_TIMES = 3;//三角去尖点，倍数参数
+	
+	//核心算法参数
 	public static final int leastPointNumInCell = 1;//聚合为region时，cell内的最小有效点数（含）。小于这个值将被舍弃
 	public static final int leastPointNumInTra = 5;//轨迹最少点数，小于此值的轨迹将被舍弃
 	public static final int periodOfHalfLift = 90;//半衰期有效系数的周期，3天

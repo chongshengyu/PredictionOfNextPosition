@@ -20,6 +20,7 @@ import com.yu.draw.entity.RegionTime;
 import com.yu.draw.util.GridUtil;
 import com.yu.draw.util.PredictionUtil;
 import com.yu.draw.util.TraFilter;
+import com.yu.evaluation.entity.ResultScores;
 import com.yu.evaluation.entity.TestUser;
 import com.yu.evaluation.util.TraUtil;
 import com.yu.prepare.util.JdbcUtil;
@@ -77,8 +78,10 @@ public class EvaAlgoriOne_12 {
 		for(TestUser testUser:testUserList){
 			//计数
 			System.out.println("user："+testUser.getUserId()+";traCnt:"+testUser.getEffectiveTraNo().size());
-			int userSuccess = 0;//预测正确
-			int userWrong = 0;//预测错误
+			int userSuccessMy = 0;//预测正确
+			int userWrongMy = 0;//预测错误
+			int userSuccessRef = 0;//预测正确
+			int userWrongRef = 0;//预测错误
 			int userUnablePredictin = 0;//无法预测
 			
 			//随机选取测试集
@@ -113,8 +116,10 @@ public class EvaAlgoriOne_12 {
 				//以01320081209230723为第一条测试·································································
 //				testTraNo = "01320081209230723";
 				System.out.println("current tra:"+testTraNo);
-				int traSuccess = 0;//预测正确
-				int traWrong = 0;//预测错误
+				int traSuccessMy = 0;//预测正确
+				int traWrongMy = 0;//预测错误
+				int traSuccessRef = 0;//预测正确
+				int traWrongRef = 0;//预测错误
 				int traUnablePredictin = 0;//无法预测
 				conn = null;
 				stmt = null;
@@ -175,18 +180,26 @@ public class EvaAlgoriOne_12 {
 					knownGpsPoint.add(new GPS(gpsPoint.getLang(),gpsPoint.getLat()));
 
 					//根据历史数据得到的regions里不能包含当前待预测的点怎么办????????????????????????????????
-					HashMap<Region, Double> scoreMap = TraUtil.getScoreMap(knownGpsPoint, originGps, time, modelMap);
+					HashMap<Region, ResultScores> scoreMap = TraUtil.getScoreMap(knownGpsPoint, originGps, time, modelMap);
 					if(scoreMap == null){
 						traUnablePredictin ++;
 						continue;
 					}
 					//找到分值最大的region????这个地方，有时候不连续？？？？？
-					Region predictionRegion = null;
-					double scoreMax = 0.0;
+					Region predictionRegionMy = null;
+					Region predictionRegionRef = null;
+					double scoreMaxMy = 0.0;
+					double scoreMaxRef = 0.0;
 					for(Region region:scoreMap.keySet()){
-						if((double)scoreMap.get(region) > scoreMax){
-							predictionRegion = region;
-							scoreMax = (double)scoreMap.get(region);
+						//我的算法得分
+						if((double)scoreMap.get(region).getMyScore() > scoreMaxMy){
+							predictionRegionMy = region;
+							scoreMaxMy = (double)scoreMap.get(region).getMyScore();
+						}
+						//参考代码得分
+						if((double)scoreMap.get(region).getRefScore() > scoreMaxRef){
+							predictionRegionRef = region;
+							scoreMaxRef = (double)scoreMap.get(region).getRefScore();
 						}
 					}
 					//判断预测是否正确
@@ -217,17 +230,26 @@ public class EvaAlgoriOne_12 {
 						traUnablePredictin ++;
 						continue;
 					}
-					if(regionTra.get(1).getRegion().equals(predictionRegion)){//正确
-						userSuccess ++;
-						traSuccess ++;
+					if(regionTra.get(1).getRegion().equals(predictionRegionMy)){//正确
+						userSuccessMy ++;
+						traSuccessMy ++;
 					}else{//错误
-						userWrong ++;
-						traWrong ++;
+						userWrongMy ++;
+						traWrongMy ++;
+					}
+					if(regionTra.get(1).getRegion().equals(predictionRegionRef)){//正确
+						userSuccessRef ++;
+						traSuccessRef ++;
+					}else{//错误
+						userWrongRef ++;
+						traWrongRef ++;
 					}
 				}
-				System.out.println("tra:"+testTraNo+",success:"+traSuccess+","+PredictionUtil.keep2bit((double)traSuccess/(traSuccess+traWrong+traUnablePredictin))*100+"%,wrong:"+traWrong+",unable:"+traUnablePredictin);
+				System.out.println("traMy:"+testTraNo+",successMy:"+traSuccessMy+",wrongMy:"+traWrongMy+",unable:"+traUnablePredictin);
+				System.out.println("traRef:"+testTraNo+",successRef:"+traSuccessRef+",wrongRef:"+traWrongRef+",unable:"+traUnablePredictin);
 			}
-			System.out.println("user:"+testUser.getUserId()+",success:"+userSuccess+",wrong:"+userWrong+",unable:"+userUnablePredictin);
+			System.out.println("userMy:"+testUser.getUserId()+",successMy:"+userSuccessMy+",wrongMy:"+userWrongMy+",unable:"+userUnablePredictin);
+			System.out.println("userRef:"+testUser.getUserId()+",successRef:"+userSuccessRef+",wrongRef:"+userWrongRef+",unable:"+userUnablePredictin);
 		}
 	}
 	
