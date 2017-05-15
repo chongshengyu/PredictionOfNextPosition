@@ -25,6 +25,11 @@ public class GridCell implements Comparable<GridCell>{
 		this.rdGps = ConvertDistGPS.ConvertDistanceToLogLat(this.ldGps, Parameter.cellWidth, 90);
 	}
 	public GPS getLuGps() {
+		/*System.out.println("===========");
+		System.out.println(luGps.getLongitude()+";"+luGps.getLatitude());
+		System.out.println(ruGps.getLongitude()+";"+ruGps.getLatitude());
+		System.out.println(rdGps.getLongitude()+";"+rdGps.getLatitude());
+		System.out.println(ldGps.getLongitude()+";"+ldGps.getLatitude());*/
 		return luGps;
 	}
 	public void setLuGps(GPS luGps) {

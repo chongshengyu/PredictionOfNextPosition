@@ -130,8 +130,8 @@ public class getGrid extends HttpServlet {
 		ArrayList<RectangleZone> zoneList = new ArrayList<RectangleZone>();
 		zoneList.add(rz);
 		
-		/*// 画出细分的每个cell
-		for (GridCell gridCell : cellList) {
+		// 画出细分的每个cell
+		/*for (GridCell gridCell : cellList) {
 			RectangleZone rzc = new RectangleZone(gridCell.getLuGps()
 					.getLongitude(), gridCell.getLuGps().getLatitude(),
 					gridCell.getRdGps().getLongitude(), gridCell.getRdGps()
@@ -146,7 +146,7 @@ public class getGrid extends HttpServlet {
 		}
 		
 		// 将grid cells保存到session中
-		String jsonStr = JSON.toJSONString(zoneList);
+		String jsonStr = JSON.toJSONString(zoneList);//grid+region
 		response.getWriter().write(jsonStr);
 	}
 

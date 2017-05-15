@@ -23,6 +23,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
   <body>
     <a href="predictionTest.html" target="_blank">准确性测试（训练集和测试集全部使用手工筛选的数据）</a></br>
     <a href="predictionTest2.html" target="_blank">准确性测试（训练集使用全部轨迹，测试集使用手工筛选的数据）</a></br>
-    <a href="showTra.html" target="_blank">显示轨迹（纠偏，平滑）</a>
+    <a href="showTra.html" target="_blank">显示轨迹（纠偏，平滑）</a></br>
+    <a href="showAllTestTra.html" target="_blank">显示全部测试用轨迹，未完报错</a></br>
+    <a href="heatmap.html" target="_blank">热力图</a>
   </body>
 </html>

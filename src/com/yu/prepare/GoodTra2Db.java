@@ -16,10 +16,13 @@ public class GoodTra2Db {
 
 	public static void main(String[] args) {
 		//将筛选出的合适轨迹插入到goodtra表
-		File goodDir = new File("F:\\Paper\\2017NextPosition\\GoodTraNum");
+		File goodDir = new File("F:\\Paper\\2017NextPosition\\实验\\GoodTraNum");
 		File[] goodTraFiles = goodDir.listFiles();
 		
 		for(File file:goodTraFiles){
+			if(file.isDirectory()){
+				continue;
+			}
 			Connection conn = null;
 			Statement stmt = null;
 			BufferedReader reader = null;

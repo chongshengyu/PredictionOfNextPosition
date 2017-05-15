@@ -1,7 +1,8 @@
 var map = new AMap.Map("container", {
 	resizeEnable : true,
 	zoom : 14,
-    center: [116.379995, 39.968436]
+    center: [116.379995, 39.968436],
+//    lang:'en'
 });
 var ee;//调用传参
 var infoWindow = new AMap.InfoWindow({
@@ -69,10 +70,10 @@ function drawGrid(e){
 			    polygonArr.push([pointslnglat[6], pointslnglat[7]]);
 			    var  polygon = new AMap.Polygon({
 			        path: polygonArr,//设置多边形边界路径
-			        strokeColor: "#FF33FF", //线颜色
-			        strokeOpacity: 0.2, //线透明度
-			        strokeWeight: 2,    //线宽
-			        fillColor: "#C2D8F8", //填充色
+			        strokeColor: "#000000", //线颜色
+			        strokeOpacity: 1, //线透明度
+			        strokeWeight: 1,    //线宽
+			        fillColor: "#55BBFF", //填充色
 			        fillOpacity: 0.35//填充透明度
 			    });
 			    polygon.setMap(map);

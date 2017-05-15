@@ -105,12 +105,12 @@ public class TraUtil {
 		return traList;
 	}
 	/**
-	 * 论文的打分算法，得到每个region的分值
+	 * 论文的打分算法，得到每个region的分值，已知的是gps位置点
 	 * @param gpsList 已知的几个待预测用户的gps位置，最多两个，第一个为上一个位置，第二个为当前位置
 	 * @param originGps 视图中心点
 	 * @param time 选定预测时间
 	 * @param modelMap 该用户的模型
-	 * @return 预测结果
+	 * @return 打分结果
 	 */
 	public static HashMap<Region, ResultScores> getScoreMap(ArrayList<GPS> gpsList,GPS originGps, String time,HashMap<Region, ArrayList<RegionModel>> modelMap){
 		GPSCell cellFirst = null;
@@ -164,7 +164,7 @@ public class TraUtil {
 				double myScore = PredictionUtil.getScoreByTwoTime(rm.getNextTime(), time);
 				if(scoreMap.containsKey(nextRegion)){
 					//PredictionUtil.keep2bit(scoreMap.get(nextRegion) + score)
-					scoreMap.put(nextRegion, new ResultScores(scoreMap.get(nextRegion).getMyScore()+myScore, scoreMap.get(nextRegion).getRefScore()+1));//加上新的分数
+					scoreMap.put(nextRegion, new ResultScores(PredictionUtil.keep2bit(scoreMap.get(nextRegion).getMyScore()+myScore), scoreMap.get(nextRegion).getRefScore()+1));//加上新的分数
 				}else{
 					scoreMap.put(nextRegion, new ResultScores(myScore, 1));
 				}
@@ -187,6 +187,79 @@ public class TraUtil {
 		}
 		return scoreMap;
 	}
+	
+	/**
+	 * 论文打分算法，得到每个region的分值，已知的是knownRegionList
+	 * @param knownRegionList 测试用户的已知regionTime序列，有1-2个。每个regionTime包含一个Region和到达该Region的时间
+	 * @param modelMap 用户模型
+	 * @return 打分结果
+	 */
+	public static HashMap<Region, ResultScores> getScoreMap(ArrayList<RegionTime> knownRegionList,HashMap<Region, ArrayList<RegionModel>> modelMap){
+		Region firstRegion = null;//前一个
+		Region secondRegion = null;//当前
+		String firstTime = "";
+		String secondTime = "";
+
+		//scoreMap初始化为0
+		HashMap<Region, ResultScores> scoreMap = new HashMap<Region, ResultScores>();
+		for(Region r:modelMap.keySet()){
+			scoreMap.put(r, new ResultScores(0.0, 0.0));
+		}
+		
+		if(knownRegionList.size() == 1){
+			secondRegion = knownRegionList.get(0).getRegion();
+			secondTime = knownRegionList.get(0).getTime();
+			ArrayList<RegionModel> regionModelList = modelMap.get(secondRegion);
+			if(null == regionModelList){//历史数据里没有这个region
+				return null;
+			}
+			for(RegionModel rm:regionModelList){
+				Region nextRegion = rm.getNext();
+				double myScore = PredictionUtil.getScoreByTwoTime(rm.getNextTime(),secondTime);
+				if(scoreMap.containsKey(nextRegion)){
+					scoreMap.put(nextRegion, new ResultScores(scoreMap.get(nextRegion).getMyScore()+myScore, scoreMap.get(nextRegion).getRefScore()+1));//加上新的分数
+				}else{
+					scoreMap.put(nextRegion, new ResultScores(myScore, 1));
+				}
+			}
+		}else if(knownRegionList.size() == 2){
+			secondTime = knownRegionList.get(0).getTime();
+			firstRegion = knownRegionList.get(0).getRegion();
+			secondRegion = knownRegionList.get(1).getRegion();
+			ArrayList<RegionModel> regionModelList = modelMap.get(secondRegion);
+			if(null == regionModelList){//历史轨迹里没有这个region
+				return null;
+			}
+			boolean matchBoolean = false;
+			for(RegionModel rm:regionModelList){
+				if(firstRegion.equals(rm.getPre())){//只增加两次region都匹配的分值
+					Region nextRegion = rm.getNext();
+					double myScore = PredictionUtil.getScoreByTwoTime(rm.getNextTime(),secondTime);
+					if(scoreMap.containsKey(nextRegion)){
+						scoreMap.put(nextRegion, new ResultScores(scoreMap.get(nextRegion).getMyScore()+myScore, scoreMap.get(nextRegion).getRefScore()+1));//加上新的分数
+					}else{
+						scoreMap.put(nextRegion, new ResultScores(myScore, 1));
+					}
+					matchBoolean = true;
+				}
+			}
+			if(!matchBoolean){//前一个Region都没有匹配，则按照只知道当前一个region的方法处理
+				for(RegionModel rm:regionModelList){
+					Region nextRegion = rm.getNext();
+					double myScore = PredictionUtil.getScoreByTwoTime(rm.getNextTime(),secondTime);
+					if(scoreMap.containsKey(nextRegion)){
+						scoreMap.put(nextRegion, new ResultScores(scoreMap.get(nextRegion).getMyScore()+myScore, scoreMap.get(nextRegion).getRefScore()+1));//加上新的分数
+					}else{
+						scoreMap.put(nextRegion, new ResultScores(myScore, 1));
+					}
+				}
+			}
+		}else {
+			System.out.println("getScoreMap中传入的knownRegionList参数错误");
+		}
+		return scoreMap;
+	}
+	
 	/**
 	 * 将cellTra转为regionTra
 	 * @param cellTra 

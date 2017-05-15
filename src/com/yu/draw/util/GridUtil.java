@@ -562,7 +562,7 @@ public class GridUtil {
 		for (GridCell gc : cells) {
 			int x = gc.getGridX();
 			int y = gc.getGridY();
-			label += "-" + StringUtil.padLeft("" + x, 2, '0')
+			label += "-" + StringUtil.padLeft("" + x, 2, '0')+";"
 					+ StringUtil.padLeft("" + y, 2, '0');
 			list.add(gc);
 		}
@@ -650,8 +650,10 @@ public class GridUtil {
 			String[] subLabel = label.split("-");
 			for(int i=1;i<subLabel.length;i++){
 				String xy = subLabel[i];  
-				String x = xy.substring(0, 2);
-				String y = xy.substring(2, 4);
+				/*String x = xy.substring(0, 2);
+				String y = xy.substring(2, 4);*/
+				String x = xy.split(";")[0];
+				String y = xy.split(";")[1];
 				Cell cell = new Cell(Integer.parseInt(x), Integer.parseInt(y));
 				cell2RegionMap.put(cell, region);
 			}

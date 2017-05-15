@@ -33,6 +33,11 @@
     <servlet-name>EvaAlgoriTestServlet2</servlet-name>
     <servlet-class>com.yu.evaluation.EvaAlgoriTestServlet2</servlet-class>
   </servlet>
+  <servlet>
+    <servlet-name>getAllTestTra</servlet-name>
+    <servlet-class>com.yu.draw.getAllTestTra</servlet-class>
+  </servlet>
+
 
 
 
@@ -72,6 +77,10 @@
   <servlet-mapping>
     <servlet-name>EvaAlgoriTestServlet2</servlet-name>
     <url-pattern>/EvaAlgoriTestServlet2</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>getAllTestTra</servlet-name>
+    <url-pattern>/getAllTestTra</url-pattern>
   </servlet-mapping>
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>

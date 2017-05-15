@@ -27,7 +27,6 @@ public class getTraPoints extends HttpServlet {
 			throws ServletException, IOException {
 
 		response.setContentType("text/plain");
-		PrintWriter out = response.getWriter();
 		String userId = request.getParameter("userid");
 		String traId = request.getParameter("traid");
 		boolean corredtedAll = request.getParameter("correctedAll").equals("1") ? true : false;//纠偏后的所有轨迹

@@ -1,9 +1,9 @@
 var map = new AMap.Map("container", {
 	resizeEnable : true,
 	zoom : 17,
-	//lang: 'en',
+	lang: 'en',
+	features:['bg','road','building'],
 });
-
 // 填充useId下拉框
 $.ajax({
 	type : "GET",
@@ -170,9 +170,9 @@ function submitOnClick() {
 				        });
 				        marker.setMap(map);*/
 					}
-				    var polyline = new AMap.Polyline({
+				    var polyline = new AMap.Polyline({//纠偏后的轨迹
 				        path: lineArr,          //设置线覆盖物路径
-				        strokeColor: "#3366FF", //线颜色
+				        strokeColor: "#090909", //线颜色
 				        strokeOpacity: 1,       //线透明度
 				        strokeWeight: 2,        //线宽
 				        strokeStyle: "solid",   //线样式
@@ -202,20 +202,20 @@ function submitOnClick() {
 					for(var i=0;i<out[2].length;i++){
 						lineArr[lineArr.length] = [out[2][i]['lang'],out[2][i]['lat']];
 					    //可以临时注释
-						var marker = new AMap.Marker({
+						/*var marker = new AMap.Marker({
 				            icon: "source/img/circle.png",
 				            position: [out[2][i]['lang'], out[2][i]['lat']],
 							offset:new AMap.Pixel(-3, -3),
 							title:out[2][i]['dateTime']+";"+out[2][i]['lang']+";"+out[2][i]['lat'],
 							extData:out[2][i]['dateTime'],
 				        });
-				        marker.setMap(map);
+				        marker.setMap(map);*/
 					}
-				    var polyline = new AMap.Polyline({
+				    var polyline = new AMap.Polyline({//过滤后的轨迹
 				        path: lineArr,          //设置线覆盖物路径
-				        strokeColor: "#34AA4B", //线颜色
+				        strokeColor: "#0066ff", //线颜色
 				        strokeOpacity: 1,       //线透明度
-				        strokeWeight: 2,        //线宽
+				        strokeWeight: 3,        //线宽
 				        strokeStyle: "dashed",   //线样式
 				        strokeDasharray: [10, 5] //补充线样式
 				    });

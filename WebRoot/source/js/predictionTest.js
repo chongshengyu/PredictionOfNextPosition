@@ -1,6 +1,10 @@
 var map = new AMap.Map("container", {
 	resizeEnable : true,
 	zoom : 17,
+//	lang:'en',
+});
+map.on('click',function(e){
+	mapOnClick(e);
 });
 
 // 填充useId下拉框
@@ -117,6 +121,17 @@ function submitOnClick() {
 		        });
 		        marker.setMap(map);
 		        marker.on('click',function(e){
+		        	
+					/*以下论文截图用*/
+		        	/*map.clearMap();
+		        	var marker = new AMap.Marker({
+			            icon: "source/img/end.png",
+			            position: [e.lnglat.getLng(), e.lnglat.getLat()],
+						offset:new AMap.Pixel(-16, -16),
+			        });
+			        marker.setMap(map);*/
+			        /*以上论文截图用*/
+			        
 		        	//预测
 		        	var userId = $('#dropUid').val();
 		        	var lng = e.lnglat.getLng();
@@ -134,7 +149,8 @@ function submitOnClick() {
 		        			alert("失败");
 		        		},
 		        		success : function(data) {
-		        			for (var i = 1; i < data.length; i++) {//从1开始，不画grid
+		        			map.clearMap();
+		        			for (var i = 0; i < data.length; i++) {//从1开始，不画grid
 		        				var zoneStr = data[i]['recZoneStr'];
 		        				var pointslnglat = zoneStr.split(',');
 		        				var polygonArr = new Array();// 多边形覆盖物节点坐标数组
@@ -197,6 +213,15 @@ function submitOnClick() {
 		        			    });
 		        			    marker.setMap(map);
 		        			}
+		        			/*以下论文截图用*/
+//				        	map.clearMap();
+				        	/*var marker = new AMap.Marker({
+					            icon: "source/img/end.png",
+					            position: [e.lnglat.getLng(), e.lnglat.getLat()],
+								offset:new AMap.Pixel(-16, -16),
+					        });
+					        marker.setMap(map);*/
+					        /*以上论文截图用*/
 		        		}
 		        	});
 		        })
@@ -224,4 +249,8 @@ function submitOnClick() {
 		    map.setFitView();
 		}
 	});
+}
+
+function mapOnClick(e){
+//	alert(e.lnglat.getLng());
 }
