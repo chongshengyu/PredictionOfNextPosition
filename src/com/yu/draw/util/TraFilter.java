@@ -38,19 +38,24 @@ public class TraFilter {
 		return tra;*/
 		//更改为对轨迹的过滤
 		//最好是线性时间
-		ArrayList<GPSPoint> tra = new ArrayList<GPSPoint>();//结果轨迹
+		ArrayList<GPSPoint> tra = traOld;//结果轨迹
+		//---------------------------------------------------期刊论文
 		//step1.根据朝向过滤
-//		System.out.println("过滤前："+traOld.size());
-		tra = getFilterdTraByOrientation(traOld);
-//		System.out.println("方向角过滤后："+tra.size());
+//		tra = getFilterdTraByOrientation(traOld);
 		
 		//step2.根据距离过滤
-		tra = getFilteredTraByDistance(tra);
-//		System.out.println("重复点过滤后"+tra.size());
+//		tra = getFilteredTraByDistance(tra);
 		
 		//step3.尖点过滤
+//		tra = getFilteredTraByTriangle(tra);
+		
+		//----------------------------------------------------会议论文
+		//step1.尖点过滤
 		tra = getFilteredTraByTriangle(tra);
-//		System.out.println("尖点过滤后"+tra.size());
+		//step2.距离过滤
+		tra = getFilteredTraByDistance2(tra);
+		//again
+		tra = getFilteredTraByTriangle(tra);
 		return tra;
 	}
 	
@@ -99,6 +104,58 @@ public class TraFilter {
 		return tra;
 	}
 	
+	/**
+	 * 根据距离，距离得到过滤后的轨迹。HPCC论文使用
+	 * @param traOld
+	 * @return
+	 */
+	private static ArrayList<GPSPoint> getFilteredTraByDistance2(ArrayList<GPSPoint> traOld){
+		ArrayList<GPSPoint> resultList = new ArrayList<GPSPoint>();//函数返回结果
+		ArrayList<GPSPoint> getCenterList;//待求质心集合
+		int index = 0;
+		GPSPoint startPoint;
+		while(true){
+			getCenterList = new ArrayList<GPSPoint>();
+			if(index<traOld.size()-1){
+				startPoint = traOld.get(index);
+				if(getDistance(startPoint, traOld.get(index+1)) > Parameter.LAMDA_HPCC_DISTANCE){
+					index ++;
+					continue;
+				}else{//距离小于阈值
+					int offset = 2;
+					getCenterList.add(startPoint);
+					getCenterList.add(traOld.get(index+1));
+					while((index+offset<traOld.size())&&(getDistance(startPoint, traOld.get(index+offset)) <= Parameter.LAMDA_HPCC_DISTANCE)){
+						getCenterList.add(traOld.get(index+offset));
+						offset ++;
+					}
+					//求质心，加入结果集
+					double totalLng = 0.0;
+					double totalLat = 0.0;
+					for(GPSPoint point:getCenterList){
+						totalLng += Double.parseDouble(point.getLang());
+						totalLat += Double.parseDouble(point.getLat());
+					}
+					String cntLng = ""+totalLng/(getCenterList.size());
+					String cntLat = ""+totalLat/(getCenterList.size());
+					String cntDateTime = getCenterList.get(0).getDateTime();
+					resultList.add(new GPSPoint(cntLng, cntLat, cntDateTime));
+					//更新index值，继续循环
+					index = index + offset + 1;
+					continue;
+				}
+			}else{
+				if(index == traOld.size()-1)
+					resultList.add(traOld.get(index));
+				else {
+					System.out.println("索引越界");
+				}
+				break;
+			}
+				
+		}
+		return resultList;
+	}
 	/**
 	 * 滑动窗口平滑轨迹
 	 * @param traOld
