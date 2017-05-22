@@ -74,8 +74,8 @@ public class PredictionUtil {
 		String hourD = ""+dateD.getHours();
 		double diff = Math.abs(Integer.parseInt(hourI) - Integer.parseInt(hourD)) > 12 ? 24 - Math.abs(Integer.parseInt(hourI) - Integer.parseInt(hourD)) : Math.abs(Integer.parseInt(hourI) - Integer.parseInt(hourD));
 		result2 = (1-Parameter.coefficientOfHalfLift)*(1 - diff / 12);
-//		return 1;
-		return result1 + result2;
+		return result2;
+//		return result1 + result2;
 	}
 	
 	public static double keep2bit(double src){

@@ -1192,8 +1192,8 @@ public class EvaAlgoriOne_1 {
 //		insertGoodPoint();
 //		testOne();//预测测试
 //		testTwo();//轨迹过滤效果，各个用户轨迹过滤前后轨迹点数
-//		testThree();//每个用户的region数，model数
-		testFive();//预测测试，使用已知region的方式，使用数据库中保存的过滤后的点
+		testThree();//每个用户的region数，model数
+//		testFive();//预测测试，使用已知region的方式，使用数据库中保存的过滤后的点
 //		testSex();
 	}
 

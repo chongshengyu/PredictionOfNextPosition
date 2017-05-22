@@ -119,6 +119,7 @@ public class TraFilter {
 			if(index<traOld.size()-1){
 				startPoint = traOld.get(index);
 				if(getDistance(startPoint, traOld.get(index+1)) > Parameter.LAMDA_HPCC_DISTANCE){
+					resultList.add(traOld.get(index));
 					index ++;
 					continue;
 				}else{//距离小于阈值
@@ -148,7 +149,7 @@ public class TraFilter {
 				if(index == traOld.size()-1)
 					resultList.add(traOld.get(index));
 				else {
-					System.out.println("索引越界");
+//					System.out.println("索引越界");
 				}
 				break;
 			}
