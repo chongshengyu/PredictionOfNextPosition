@@ -1,7 +1,7 @@
 var map = new AMap.Map("container", {
 	resizeEnable : true,
 	zoom : 17,
-//	lang:'en',
+	lang:'en',
 });
 map.on('click',function(e){
 	mapOnClick(e);
@@ -123,13 +123,13 @@ function submitOnClick() {
 		        marker.on('click',function(e){
 		        	
 					/*以下论文截图用*/
-		        	/*map.clearMap();
+		        	map.clearMap();
 		        	var marker = new AMap.Marker({
 			            icon: "source/img/end.png",
 			            position: [e.lnglat.getLng(), e.lnglat.getLat()],
 						offset:new AMap.Pixel(-16, -16),
 			        });
-			        marker.setMap(map);*/
+			        marker.setMap(map);
 			        /*以上论文截图用*/
 			        
 		        	//预测
@@ -149,7 +149,7 @@ function submitOnClick() {
 		        			alert("失败");
 		        		},
 		        		success : function(data) {
-		        			map.clearMap();
+//		        			map.clearMap();
 		        			for (var i = 0; i < data.length; i++) {//从1开始，不画grid
 		        				var zoneStr = data[i]['recZoneStr'];
 		        				var pointslnglat = zoneStr.split(',');
@@ -199,19 +199,24 @@ function submitOnClick() {
 		        				var center_lng = (Number(lu_lng) + Number(rd_lng))/2;
 		        				var center_lat = (Number(lu_lat) + Number(rd_lat))/2;
 		        				//标注
-		        				var marker = new AMap.Marker({
-		        					icon : new AMap.Icon({
-		        						size:new AMap.Size(1,1),
-		        						image:"source/img/score.png",
-		        					}),
-		        					position : [center_lng,center_lat],
-		        					offset:new AMap.Pixel(-6, -6),
-		        				});
-		        			    marker.setLabel({//label默认蓝框白底左上角显示，样式className为：amap-marker-label
-		        			        offset: new AMap.Pixel(-2, 0),//修改label相对于maker的位置
-		        			        content: score
-		        			    });
-		        			    marker.setMap(map);
+		        				if((e.lnglat.getLng()>lu_lng) &&(e.lnglat.getLng()<rd_lng) && (e.lnglat.getLat()>rd_lat) &&(e.lnglat.getLat()<lu_lat)){
+		        					//放红色圆圈
+		        				}else if (score > 0){
+			        				var marker = new AMap.Marker({
+			        					/*icon : new AMap.Icon({
+			        						size:new AMap.Size(1,1),
+			        						image:"source/img/score.png",
+			        					}),*/
+			        					position : [center_lng,center_lat],
+			        					offset:new AMap.Pixel(-16, -12),
+			        					content:"<span style='font-size:24px'>"+score+"</span>",
+			        				});
+			        			    /*marker.setLabel({//label默认蓝框白底左上角显示，样式className为：amap-marker-label
+			        			        offset: new AMap.Pixel(-2, 0),//修改label相对于maker的位置
+			        			        content: score
+			        			    });*/
+			        			    marker.setMap(map);
+		        				}
 		        			}
 		        			/*以下论文截图用*/
 //				        	map.clearMap();
