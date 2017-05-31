@@ -150,7 +150,7 @@ function submitOnClick() {
 		        		},
 		        		success : function(data) {
 //		        			map.clearMap();
-		        			for (var i = 0; i < data.length; i++) {//从1开始，不画grid
+		        			for (var i = 1; i < data.length; i++) {//从1开始，不画grid;从0开始，画grid
 		        				var zoneStr = data[i]['recZoneStr'];
 		        				var pointslnglat = zoneStr.split(',');
 		        				var polygonArr = new Array();// 多边形覆盖物节点坐标数组
@@ -215,7 +215,7 @@ function submitOnClick() {
 			        			        offset: new AMap.Pixel(-2, 0),//修改label相对于maker的位置
 			        			        content: score
 			        			    });*/
-			        			    marker.setMap(map);
+//			        			    marker.setMap(map);
 		        				}
 		        			}
 		        			/*以下论文截图用*/
