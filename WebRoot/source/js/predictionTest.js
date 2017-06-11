@@ -208,14 +208,14 @@ function submitOnClick() {
 			        						image:"source/img/score.png",
 			        					}),*/
 			        					position : [center_lng,center_lat],
-			        					offset:new AMap.Pixel(-16, -12),
-			        					content:"<span style='font-size:24px'>"+score+"</span>",
+			        					offset:new AMap.Pixel(-20, -12),
+			        					content:"<span style='font-size:24px;font-weight:bold'>"+score+"</span>",
 			        				});
 			        			    /*marker.setLabel({//label默认蓝框白底左上角显示，样式className为：amap-marker-label
 			        			        offset: new AMap.Pixel(-2, 0),//修改label相对于maker的位置
 			        			        content: score
 			        			    });*/
-//			        			    marker.setMap(map);
+			        			    marker.setMap(map);
 		        				}
 		        			}
 		        			/*以下论文截图用*/

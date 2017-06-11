@@ -41,21 +41,21 @@ public class TraFilter {
 		ArrayList<GPSPoint> tra = traOld;//结果轨迹
 		//---------------------------------------------------期刊论文
 		//step1.根据朝向过滤
-//		tra = getFilterdTraByOrientation(traOld);
+		tra = getFilterdTraByOrientation(traOld);
 		
 		//step2.根据距离过滤
-//		tra = getFilteredTraByDistance(tra);
+		tra = getFilteredTraByDistance(tra);
 		
 		//step3.尖点过滤
-//		tra = getFilteredTraByTriangle(tra);
+		tra = getFilteredTraByTriangle(tra);
 		
 		//----------------------------------------------------会议论文
-		//step1.尖点过滤
+		/*//step1.尖点过滤
 		tra = getFilteredTraByTriangle(tra);
 		//step2.距离过滤
 		tra = getFilteredTraByDistance2(tra);
 		//again
-		tra = getFilteredTraByTriangle(tra);
+		tra = getFilteredTraByTriangle(tra);*/
 		return tra;
 	}
 	
