@@ -23,7 +23,9 @@
 					测试用户
 					<select id='dropUid' onchange='useridOnchange()'></select> 
 					测试轨迹
-					<select id='dropTid'></select>
+					<select id='dropTid' onchange='tranumOnchange()'></select>
+					星期：
+					<input type="text" id="input_week">
 					<input type="button" value="显示实际轨迹" onclick="submitOnClick()">
 					<input type="button" value="下一条" onclick="nextOnClick()">
 				</div>

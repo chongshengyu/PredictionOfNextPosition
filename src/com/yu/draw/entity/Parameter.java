@@ -5,7 +5,7 @@ public class Parameter {
 	public static final double grid_height = 0.1;//0.04*/	
 	//参数改为格子的边长
 	//增加grid的边上有几个格子这个参数，为奇数。
-	public static double cellWidth = 0.3;//cell边长，单位公里，cell是正方形
+	public static double cellWidth = 0.3;//cell边长，单位公里，cell是正方形,0.3
 	public static int gridWidth = 11;//grid每个边的cell数，grid是正方形。大于0小于100。前台展示和后台测试都是用的这个参数
 	public static int MAXREGIONWIDTH = 5;//region的最大长度
 	/*					(lng,lat+0.02)

@@ -261,6 +261,10 @@ public class EvaAlgoriTestServlet extends HttpServlet {
 			}//scoreMap为空，无法预测
 			String result = JSON.toJSONString(rectangleScoreList);
 			response.getWriter().write(result);
+		}else if("getWeek".equals(type)){
+			//给定轨迹号，获得星期几
+			String tid = request.getParameter("tid");
+			response.getWriter().write(TraUtil.getWeekByTraNum(tid));
 		}
 	}
 

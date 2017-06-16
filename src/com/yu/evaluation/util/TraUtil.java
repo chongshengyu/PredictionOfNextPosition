@@ -4,10 +4,16 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.TimeZone;
 
 import com.yu.draw.entity.Cell;
 import com.yu.draw.entity.GPS;
@@ -306,5 +312,33 @@ public class TraUtil {
 			}
 		}
 		return regionTra;
+	}
+	
+	/**
+	 * 根据轨迹号获取星期几，1是星期一，0是星期天
+	 * @param tranum 轨迹号,格式 00120081025231428
+	 * @return 星期几，从Sunday值为1开始编号
+	 */
+	public static String getWeekByTraNum(String tranum){
+		DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+		df.setTimeZone(TimeZone.getTimeZone("GMT"));
+		Date date = null;
+		try {
+			date = df.parse(tranum.substring(3));
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//转为东八区
+//		System.out.println(date);
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		int weekDay = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+//		System.out.println(tranum);
+//		System.out.println(weekDay);
+//		System.out.println("sunday"+Calendar.SUNDAY);
+//		System.out.println("monday"+Calendar.MONDAY);
+		return ""+weekDay;
 	}
 }

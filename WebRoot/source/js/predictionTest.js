@@ -38,6 +38,7 @@ $.ajax({
 							"<option value='" + userTras[i] + "'>"
 									+ userTras[i] + "</option>");
 				}
+				tranumOnchange();//更新星期
 			}
 		});
 		// 填充userId列表
@@ -74,10 +75,30 @@ function useridOnchange() {
 		}
 	});
 }
+
+//tranum下拉框变化的响应，获取星期几
+function tranumOnchange(){
+	$('#input_week').empty();
+	var tranum = $('#dropTid').val();
+	$.ajax({
+		type:"get",
+		async:false,
+		charset:"UTF-8",
+		url: "/Paper/EvaAlgoriTestServlet",
+		data:"type=getWeek&tid="+tranum,
+		dataType:"text",
+		error:function(){alert("error");},
+		success:function(data){
+			$('#input_week').val(data);
+		}
+	});
+}
+
 // 下一条轨迹
 function nextOnClick(){
 	var nextTid = $("#dropTid option:selected").next().val();
 	$("#dropTid").find("option[value='"+nextTid+"']").attr("selected",true);
+	tranumOnchange();//更新星期
 	submitOnClick();
 }
 
@@ -162,7 +183,7 @@ function submitOnClick() {
 		        					path : polygonArr,// 设置多边形边界路径
 		        					strokeColor : "#000000", // 线颜色
 		        					strokeOpacity : 1, // 线透明度
-		        					strokeWeight : 1, // 线宽
+		        					strokeWeight : 2, // 线宽
 		        					fillColor : "#55BBFF", // 填充色
 		        					fillOpacity : 0.35
 		        				// 填充透明度
