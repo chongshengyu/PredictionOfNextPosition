@@ -72,6 +72,7 @@ function useridOnchange() {
 						"<option value='" + userTras[i] + "'>" + userTras[i]
 								+ "</option>");
 			}
+			tranumOnchange();
 		}
 	});
 }

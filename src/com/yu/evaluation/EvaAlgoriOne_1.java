@@ -1,14 +1,25 @@
 package com.yu.evaluation;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
+import java.util.TimeZone;
 
 import com.alibaba.fastjson.JSON;
 import com.yu.draw.entity.GPS;
@@ -190,7 +201,7 @@ public class EvaAlgoriOne_1 {
 					knownGpsPoint.add(new GPS(gpsPoint.getLang(),gpsPoint.getLat()));
 
 					//根据历史数据得到的regions里不能包含当前待预测的点怎么办????????????????????????????????
-					HashMap<Region, ResultScores> scoreMap = TraUtil.getScoreMap(knownGpsPoint, originGps, time, modelMap);//设置不同算法，得到不同分数
+					HashMap<Region, ResultScores> scoreMap = TraUtil.getScoreMap(knownGpsPoint, originGps, time, modelMap, 1.2, 1.0);//设置不同算法，得到不同分数
 					if(scoreMap == null){
 						traUnablePredictin ++;
 						continue;
@@ -408,11 +419,11 @@ public class EvaAlgoriOne_1 {
 			for(String traNo:testUser.getEffectiveTraNo()){
 				traCount++;
 				ArrayList<GPSPoint> traPointsList = new ArrayList<GPSPoint>();
-				sql = "SELECT Long_gcj,Lat_gcj,DateTime FROM Location where TraNum='"+traNo+"' ORDER BY DateTime";
+				sql = "SELECT Longitude,Latitude,DateTime FROM filteredpoints where TraNum='"+traNo+"' ORDER BY DateTime";
 				try {
 					rs = stmt.executeQuery(sql);
 					while(rs.next()){
-						GPSPoint point = new GPSPoint(rs.getString("Long_gcj"), rs.getString("Lat_gcj"), rs.getString("DateTime"));
+						GPSPoint point = new GPSPoint(rs.getString("Longitude"), rs.getString("Latitude"), rs.getString("DateTime"));
 						traPointsList.add(point);
 					}
 				} catch (SQLException e) {
@@ -421,7 +432,7 @@ public class EvaAlgoriOne_1 {
 				} finally{
 					//JdbcUtil.close(conn, stmt);
 				}
-				traPointsList = TraFilter.getSparsedTra(traPointsList);//过滤
+//				traPointsList = TraFilter.getSparsedTra(traPointsList);//不用过滤
 //				traList.add(traPointsList);
 				ArrayList<GPSCell> cellTra = GridUtil.GPSTraToCellTra(traPointsList, originGps);
 				for(GPSCell cell:cellTra){
@@ -468,6 +479,8 @@ public class EvaAlgoriOne_1 {
 		Parameter.cellWidth = 0.2;
 		Parameter.gridWidth = 200;//保证grid边长为40km
 		Parameter.MAXREGIONWIDTH = 1;
+		double tH = 1.2;
+		double tL = 1.0;
 		
 		Connection conn = null;
 		Statement stmt = null;
@@ -650,7 +663,7 @@ public class EvaAlgoriOne_1 {
 						for(int i=0;i<knowRegionNum;i++){
 							knownRegionList.add(testRegionTra.get(regionIndex + i));
 						}
-						HashMap<Region, ResultScores> scoreMap = TraUtil.getScoreMap(knownRegionList, modelMap);
+						HashMap<Region, ResultScores> scoreMap = TraUtil.getScoreMap(knownRegionList, modelMap, tH, tL);
 						if(null == scoreMap){
 							userUnable ++;
 							traUnable ++;
@@ -727,23 +740,43 @@ public class EvaAlgoriOne_1 {
 	}
 
 	//预测结果评价，使用数据库中过滤以后的位置点
-	public static void testFive(){
+	public static void testFive() throws FileNotFoundException{
+		//下面还重载了带三个参数的版本
+		double tH = 1.2;
+		double tL = 1.0;
 		Parameter.cellWidth = 0.2;
 		Parameter.gridWidth = 200;//保证grid边长为40km
-		Parameter.MAXREGIONWIDTH = 2;
+		Parameter.MAXREGIONWIDTH = 2;								//lamda_max_w可取值 1-5(最终取值2）
+		String formula1 = "result3 = 1.2/1.0";//核心算法方法也要改    		//result3(tao)可取值 1.5/0.5, 1.2/1.0, 1.0/1.0（最终取值1.2/1.0)
+		String formula2 = "result = result2 * result3";
+		
+		System.out.println("start...");
+//		System.setOut(new PrintStream(new File("F:\\OneDrive\\NextPositionPrediction\\实验\\1006\\round1")));
 		
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rs = null;
 		String sql = "";
 		ArrayList<String> testUserIdList = new ArrayList<String>();
-		sql = "SELECT DISTINCT UserId FROM goodTra";
+		
+		ArrayList<String> userIdListToTest = new ArrayList<String>();
+//		String[] s = {"001","035","074","096","114","140","163","169"};
+		String[] s  = {"013","046","085","113","115","147","168","179"};
+		System.out.println("全部测试用户："+Arrays.toString(s));
+		userIdListToTest.addAll(Arrays.asList(s));
+		
+		sql = "SELECT DISTINCT UserId FROM goodtratotest";
 		try {
 			conn = JdbcUtil.getConnection();
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery(sql);
 			while(rs.next()){
-				testUserIdList.add(rs.getString("UserId"));
+				String uid = rs.getString("UserId");
+				for(String ss:userIdListToTest){
+					if(uid.equals(ss)){
+						testUserIdList.add(uid);
+					}
+				}
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -770,11 +803,13 @@ public class EvaAlgoriOne_1 {
 			}
 			testUserList.add(new TestUser(userId, userTraNo));
 		}
-		
 		System.out.println("Parameter.cellWidth="+Parameter.cellWidth);
 		System.out.println("Parameter.gridWidth="+Parameter.gridWidth);
 		System.out.println("Parameter.MAXREGIONWIDTH="+Parameter.MAXREGIONWIDTH);
+		System.out.println(formula1);
+		System.out.println(formula2);
 		System.out.println();
+		long startMillis = System.currentTimeMillis();
 		
 		//对于测试集中的每个用户
 		for(TestUser testUser:testUserList){
@@ -796,7 +831,7 @@ public class EvaAlgoriOne_1 {
 			int[][] numArr = new int[Parameter.gridWidth][Parameter.gridWidth];
 			
 			GPS gpsCenter = new GPS(lngStr, latStr);
-			//得到Grid原点坐标，左下角坐标
+			//得到Grid原点坐标，即Grid左下角坐标
 			GPS originGps = GridUtil.getGridOriginGpsByCenter(gpsCenter);
 			//grid内的训练轨迹集，内部也做了同样的轨迹过滤
 			ArrayList<ArrayList<GPSCell>> cellTraList = new ArrayList<ArrayList<GPSCell>>();
@@ -837,13 +872,13 @@ public class EvaAlgoriOne_1 {
 //				System.out.println("读入第？轨迹:"+traCount);
 			}
 			JdbcUtil.close(conn, stmt);
-			System.out.println("轨迹读入结束，训练集大小："+traCount);
+//			System.out.println("轨迹读入结束，训练集大小："+traCount);
 			
 			LinkedList<Region> regionList = GridUtil.getRegionListByPointNum(numArr, originGps);
-			System.out.println("regionListSize:"+regionList.size());
+//			System.out.println("regionListSize:"+regionList.size());
 			ArrayList<ArrayList<RegionTime>> regionTraList = GridUtil.cellTraList2RegionTraList(cellTraList, regionList);
 			HashMap<Region, ArrayList<RegionModel>> modelMap = GridUtil.getModelMap(regionList, regionTraList);
-			System.out.println("训练结束");
+			System.out.println("train ends.");
 			
 			//实验时发现这里有错
 			/*System.out.println("========================");
@@ -912,7 +947,7 @@ public class EvaAlgoriOne_1 {
 				ArrayList<ArrayList<RegionTime>> testRegionTraList = GridUtil.cellTraList2RegionTraList(tmp, regionList);
 				ArrayList<RegionTime> testRegionTra = testRegionTraList.get(0);//测试轨迹对应的regionTra
 				if(testRegionTra.size()<4){
-					System.out.println("当前测试轨迹region总数小于4");
+					System.out.println("log:total region number of current trace is less than 4.");
 					System.out.println(testTraNo);
 					System.out.println(testRegionTra.size());
 					continue;
@@ -926,7 +961,7 @@ public class EvaAlgoriOne_1 {
 						for(int i=0;i<knowRegionNum;i++){
 							knownRegionList.add(testRegionTra.get(regionIndex + i));
 						}
-						HashMap<Region, ResultScores> scoreMap = TraUtil.getScoreMap(knownRegionList, modelMap);
+						HashMap<Region, ResultScores> scoreMap = TraUtil.getScoreMap(knownRegionList, modelMap, tH, tL);/////////////核心算法
 						if(null == scoreMap){
 							userUnable ++;
 							traUnable ++;
@@ -988,11 +1023,36 @@ public class EvaAlgoriOne_1 {
 				System.out.println("traSuccessMy_2:"+traSuccessMy_2+";traFailMy_2:"+traFailMy_2+";traUnable:"+traUnable);
 				System.out.println("traSuccessRef_2:"+traSuccessRef_2+";traFailRef_2:"+traFailRef_2+";traUnable:"+traUnable);*/
 			}//tra
-			System.out.println("userSuccessMy_1:"+userSuccessMy_1+";userFailMy_1:"+userFailMy_1+";userUnable:"+userUnable);
+			/*System.out.println("userSuccessMy_1:"+userSuccessMy_1+";userFailMy_1:"+userFailMy_1+";userUnable:"+userUnable);
 			System.out.println("userSuccessRef_1:"+userSuccessRef_1+";userFailRef_1:"+userFailRef_1+";userUnable:"+userUnable);
 			System.out.println("userSuccessMy_2:"+userSuccessMy_2+";userFailMy_2:"+userFailMy_2+";userUnable:"+userUnable);
 			System.out.println("userSuccessRef_2:"+userSuccessRef_2+";userFailRef_2:"+userFailRef_2+";userUnable:"+userUnable);
+			System.out.println();*/
+			
+			System.out.printf("%-20s%-20s%-20s%.4f",
+					"userSuccessMy_1:"+userSuccessMy_1+";",
+					"userFailMy_1:"+userFailMy_1+";",
+					"userUnable:"+userUnable,
+					((double)userSuccessMy_1)/(userSuccessMy_1+userFailMy_1+userUnable));
 			System.out.println();
+			System.out.printf("%-20s%-20s%-20s%.4f",
+					"userSuccessRef_1:"+userSuccessRef_1+";",
+					"userFailMy_1:"+userFailRef_1+";",
+					"userUnable:"+userUnable,
+					((double)userSuccessRef_1)/(userSuccessRef_1+userFailRef_1+userUnable));
+			System.out.println();
+			System.out.printf("%-20s%-20s%-20s%.4f",
+					"userSuccessMy_2:"+userSuccessMy_2+";",
+					"userFailMy_2:"+userFailMy_2+";",
+					"userUnable:"+userUnable,
+					((double)userSuccessMy_2)/(userSuccessMy_2+userFailMy_2+userUnable));
+			System.out.println();
+			System.out.printf("%-20s%-20s%-20s%.4f",
+					"userSuccessRef_2:"+userSuccessRef_2+";",
+					"userFailRef_2:"+userFailRef_2+";",
+					"userUnable:"+userUnable,
+					((double)userSuccessRef_2)/(userSuccessRef_2+userFailRef_2+userUnable));
+			System.out.println("\n++++++++++++++++++++++++++++++++++++++");
 			cellTraList = null;
 			testTraNoList = null;
 			regionList = null;
@@ -1000,6 +1060,346 @@ public class EvaAlgoriOne_1 {
 			modelMap = null;
 			numArr = null;
 		}//user
+		//总计时
+		long endMillis = System.currentTimeMillis();
+		System.out.println("total time:"+(endMillis-startMillis)/1000+"s");
+	}
+	
+	//和testFive()一样，只不过改成了参数式参数
+	/**
+	 * 
+	 * @param dataset 选择训练集/测试集，1表示训练集，单数用户；2表示测试集，双数用户
+	 * @param lamda regionmax大小，可取值1/2/3/4/5
+	 * @param tH 参数tao_h
+	 * @param tL 参数tao_l 两组取值可为 1.5/1.0, 1.2/1.0, 1.0/1.0
+	 * @throws FileNotFoundException
+	 */
+	public static void testFive(int dataset, int lamda, double tH, double tL) throws FileNotFoundException{
+		Parameter.cellWidth = 0.2;
+		Parameter.gridWidth = 200;//保证grid边长为40km
+		Parameter.MAXREGIONWIDTH = lamda;								//lamda_max_w可取值 1-5(最终取值2）
+		String formula1 = "result3 = "+tH+"/"+tL;//核心算法方法也要改    		//result3(tao)可取值 1.5/0.5, 1.2/1.0, 1.0/1.0（最终取值1.2/1.0)
+		String formula2 = "result = result2 * result3";
+		
+		System.out.println("start...");
+//			System.setOut(new PrintStream(new File("F:\\OneDrive\\NextPositionPrediction\\实验\\1006\\round1")));
+		
+		Connection conn = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		String sql = "";
+		ArrayList<String> testUserIdList = new ArrayList<String>();
+		
+		ArrayList<String> userIdListToTest = new ArrayList<String>();
+		
+		if(dataset == 1){//参数训练集
+			String[] s = {"001","035","074","096","114","140","163","169"};
+			System.out.println("全部测试用户："+Arrays.toString(s));
+			userIdListToTest.addAll(Arrays.asList(s));
+		}else{//参数测试集
+			String[] s  = {"013","046","085","113","115","147","168","179"};
+			System.out.println("全部测试用户："+Arrays.toString(s));
+			userIdListToTest.addAll(Arrays.asList(s));
+		}
+		
+		sql = "SELECT DISTINCT UserId FROM goodtratotest";
+		try {
+			conn = JdbcUtil.getConnection();
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery(sql);
+			while(rs.next()){
+				String uid = rs.getString("UserId");
+				for(String ss:userIdListToTest){
+					if(uid.equals(ss)){
+						testUserIdList.add(uid);
+					}
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally{
+			JdbcUtil.close(conn, stmt);
+		}
+		//得到每个测试用户的全部轨迹号。
+		ArrayList<TestUser> testUserList = new ArrayList<TestUser>();
+		for(String userId:testUserIdList){
+			ArrayList<String> userTraNo = new ArrayList<String>();
+			sql = "SELECT TraNum FROM goodTra WHERE UserId='"+userId+"'";
+			try{
+				conn = JdbcUtil.getConnection();
+				stmt = conn.createStatement();
+				rs = stmt.executeQuery(sql);
+				while(rs.next()){
+					userTraNo.add(rs.getString("TraNum"));
+				}
+			}catch(SQLException e){
+				e.printStackTrace();
+			}finally{
+				JdbcUtil.close(conn, stmt);
+			}
+			testUserList.add(new TestUser(userId, userTraNo));
+		}
+		System.out.println("Parameter.cellWidth="+Parameter.cellWidth);
+		System.out.println("Parameter.gridWidth="+Parameter.gridWidth);
+		System.out.println("Parameter.MAXREGIONWIDTH="+Parameter.MAXREGIONWIDTH);
+		System.out.println(formula1);
+		System.out.println(formula2);
+		System.out.println();
+		long startMillis = System.currentTimeMillis();
+		
+		//对于测试集中的每个用户
+		for(TestUser testUser:testUserList){
+			System.gc();
+			int userSuccessMy_1 = 0;
+			int userFailMy_1 = 0;
+			int userSuccessRef_1 = 0;
+			int userFailRef_1 = 0;
+			int userSuccessMy_2 = 0;
+			int userFailMy_2 = 0;
+			int userSuccessRef_2 = 0;
+			int userFailRef_2 = 0;
+			int userUnable = 0;
+			//计数
+			System.out.println("user："+testUser.getUserId()+";traCnt:"+testUser.getEffectiveTraNo().size());
+			String lngStr = "116.39719";
+			String latStr = "39.916538";
+			
+			int[][] numArr = new int[Parameter.gridWidth][Parameter.gridWidth];
+			
+			GPS gpsCenter = new GPS(lngStr, latStr);
+			//得到Grid原点坐标，即Grid左下角坐标
+			GPS originGps = GridUtil.getGridOriginGpsByCenter(gpsCenter);
+			//grid内的训练轨迹集，内部也做了同样的轨迹过滤
+			ArrayList<ArrayList<GPSCell>> cellTraList = new ArrayList<ArrayList<GPSCell>>();
+			try {
+				conn = JdbcUtil.getConnection();
+				stmt = conn.createStatement();
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
+			int traCount=0;
+			for(String traNo:testUser.getEffectiveTraNo()){//只用前1/2的轨迹做训练集
+				if(traCount++>testUser.getEffectiveTraNo().size()*0.75){
+					break;
+				}
+				ArrayList<GPSPoint> traPointsList = new ArrayList<GPSPoint>();
+				sql = "SELECT Longitude,Latitude,DateTime FROM filteredpoints where TraNum='"+traNo+"' ORDER BY DateTime";
+				try {
+					rs = stmt.executeQuery(sql);
+					while(rs.next()){
+						GPSPoint point = new GPSPoint(rs.getString("Longitude"), rs.getString("Latitude"), rs.getString("DateTime"));
+						traPointsList.add(point);
+					}
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				//数据库中已是过滤结束的
+				//traPointsList = TraFilter.getSparsedTra(traPointsList);//不用过滤了过滤
+				ArrayList<GPSCell> cellTra = GridUtil.GPSTraToCellTra(traPointsList, originGps);
+				cellTraList.add(cellTra);
+				for(GPSCell cell:cellTra){
+					int x = cell.getGridX();
+					int y = cell.getGridY();
+					numArr[x][y] += 1;
+				}
+//					System.out.println("读入第？轨迹:"+traCount);
+			}
+			JdbcUtil.close(conn, stmt);
+//				System.out.println("轨迹读入结束，训练集大小："+traCount);
+			
+			LinkedList<Region> regionList = GridUtil.getRegionListByPointNum(numArr, originGps);
+//				System.out.println("regionListSize:"+regionList.size());
+			ArrayList<ArrayList<RegionTime>> regionTraList = GridUtil.cellTraList2RegionTraList(cellTraList, regionList);
+			HashMap<Region, ArrayList<RegionModel>> modelMap = GridUtil.getModelMap(regionList, regionTraList);
+			System.out.println("train ends.");
+			
+			//实验时发现这里有错
+			/*System.out.println("========================");
+			for(Region region:modelMap.keySet()){
+				System.out.println(region);
+				System.out.println("------");
+				for(RegionModel rm:modelMap.get(region)){
+					System.out.println(rm);
+				}
+			}
+			System.out.println("========================");*/
+			
+			//以上训练，以下测试
+
+			ArrayList<String> testTraNoList = new ArrayList<String>();//测试轨迹号
+			//数据库中指定的测试轨迹
+			sql = "SELECT TraNum FROM goodtratotest WHERE UserId='"+testUser.getUserId()+"'";
+			try{
+				conn = JdbcUtil.getConnection();
+				stmt = conn.createStatement();
+				rs = stmt.executeQuery(sql);
+				while(rs.next()){
+					testTraNoList.add(rs.getString("TraNum"));
+				}
+			}catch(SQLException e){
+				e.printStackTrace();
+			}finally{
+				JdbcUtil.close(conn, stmt);
+			}
+			System.out.println("testTraCnt:"+testTraNoList.size());
+
+			for(String testTraNo : testTraNoList){//对于每条测试轨迹
+				int traSuccessMy_1 = 0;
+				int traFailMy_1 = 0;
+				int traSuccessRef_1 = 0;
+				int traFailRef_1 = 0;
+				int traSuccessMy_2 = 0;
+				int traFailMy_2 = 0;
+				int traSuccessRef_2 = 0;
+				int traFailRef_2 = 0;
+				int traUnable = 0;
+				
+				ArrayList<GPSPoint> traPointsList = new ArrayList<GPSPoint>();
+				try{
+					conn = JdbcUtil.getConnection();
+					stmt = conn.createStatement();
+				}catch(SQLException e){
+					e.printStackTrace();
+				}
+				sql = "SELECT Longitude,Latitude,DateTime FROM filteredpoints where TraNum='"+testTraNo+"' ORDER BY DateTime";
+				try{
+					rs = stmt.executeQuery(sql);
+					while(rs.next()){
+						GPSPoint point = new GPSPoint(rs.getString("Longitude"), rs.getString("Latitude"), rs.getString("DateTime"));
+						traPointsList.add(point);
+					}
+				}catch(SQLException e){
+					e.printStackTrace();
+				}
+				JdbcUtil.close(conn, stmt);
+				//使用数据库中过滤后的数据
+//					traPointsList = TraFilter.getSparsedTra(traPointsList);//不用过滤了
+				ArrayList<GPSCell> cellTra = GridUtil.GPSTraToCellTra(traPointsList, originGps);//得到对应的cellTra
+				ArrayList<ArrayList<GPSCell>> tmp = new ArrayList<ArrayList<GPSCell>>();
+				tmp.add(cellTra);
+				ArrayList<ArrayList<RegionTime>> testRegionTraList = GridUtil.cellTraList2RegionTraList(tmp, regionList);
+				ArrayList<RegionTime> testRegionTra = testRegionTraList.get(0);//测试轨迹对应的regionTra
+				if(testRegionTra.size()<4){
+					System.out.println("log:total region number of current trace is less than 4.");
+					System.out.println(testTraNo);
+					System.out.println(testRegionTra.size());
+					continue;
+				}
+				//只需要测试已知一个region，和已知两个region的情况。
+				ArrayList<RegionTime> knownRegionList = new ArrayList<RegionTime>();
+				for(int knowRegionNum=1;knowRegionNum<3;knowRegionNum++){//已知的region数，取值为1,2
+//							System.out.println("knowRegionNun:"+knowRegionNum);
+					for(int regionIndex=0;regionIndex<testRegionTra.size()-knowRegionNum;regionIndex++){//遍历testRegionTra中的region进行测试
+						knownRegionList.clear();
+						for(int i=0;i<knowRegionNum;i++){
+							knownRegionList.add(testRegionTra.get(regionIndex + i));
+						}
+						HashMap<Region, ResultScores> scoreMap = TraUtil.getScoreMap(knownRegionList, modelMap, tH, tL);/////////////核心算法
+						if(null == scoreMap){
+							userUnable ++;
+							traUnable ++;
+							continue;
+						}
+						Region realRegion = testRegionTra.get(regionIndex + knowRegionNum).getRegion();
+						Region predictionRegionMy = null;
+						Region predictionRegionRef = null;
+						double scoreMaxMy = 0.0;
+						double scoreMaxRef = 0.0;
+						for(Region region:scoreMap.keySet()){
+							//我的算法得分
+							if((double)scoreMap.get(region).getMyScore() > scoreMaxMy){
+								predictionRegionMy = region;
+								scoreMaxMy = (double)scoreMap.get(region).getMyScore();
+							}
+							//参考算法得分
+							if((double)scoreMap.get(region).getRefScore() > scoreMaxRef){
+								predictionRegionRef = region;
+								scoreMaxRef = (double)scoreMap.get(region).getRefScore();
+							}
+						}
+						
+						if(knowRegionNum == 1){//已知一点
+							if(realRegion.equals(predictionRegionMy)){
+								traSuccessMy_1 ++;
+								userSuccessMy_1 ++;
+							}else{
+								traFailMy_1 ++;
+								userFailMy_1 ++;
+							}
+							if(realRegion.equals(predictionRegionRef)){
+								traSuccessRef_1++;
+								userSuccessRef_1++;
+							}else{
+								traFailRef_1++;
+								userFailRef_1++;
+							}
+						}else if(knowRegionNum ==2){//已知两点
+							if(realRegion.equals(predictionRegionMy)){
+								traSuccessMy_2 ++;
+								userSuccessMy_2 ++;
+							}else{
+								traFailMy_2 ++;
+								userFailMy_2 ++;
+							}
+							if(realRegion.equals(predictionRegionRef)){
+								traSuccessRef_2++;
+								userSuccessRef_2++;
+							}else{
+								traFailRef_2++;
+								userFailRef_2++;
+							}
+						}
+					}
+				}//已知的region数，取值为1,2
+				/*System.out.println("traSuccessMy_1:"+traSuccessMy_1+";traFailMy_1:"+traFailMy_1+";traUnable:"+traUnable);
+				System.out.println("traSuccessRef_1:"+traSuccessRef_1+";traFailRef_1:"+traFailRef_1+";traUnable:"+traUnable);
+				System.out.println("traSuccessMy_2:"+traSuccessMy_2+";traFailMy_2:"+traFailMy_2+";traUnable:"+traUnable);
+				System.out.println("traSuccessRef_2:"+traSuccessRef_2+";traFailRef_2:"+traFailRef_2+";traUnable:"+traUnable);*/
+			}//tra
+			/*System.out.println("userSuccessMy_1:"+userSuccessMy_1+";userFailMy_1:"+userFailMy_1+";userUnable:"+userUnable);
+			System.out.println("userSuccessRef_1:"+userSuccessRef_1+";userFailRef_1:"+userFailRef_1+";userUnable:"+userUnable);
+			System.out.println("userSuccessMy_2:"+userSuccessMy_2+";userFailMy_2:"+userFailMy_2+";userUnable:"+userUnable);
+			System.out.println("userSuccessRef_2:"+userSuccessRef_2+";userFailRef_2:"+userFailRef_2+";userUnable:"+userUnable);
+			System.out.println();*/
+			
+			System.out.printf("%-20s%-20s%-20s%.4f",
+					"userSuccessMy_1:"+userSuccessMy_1+";",
+					"userFailMy_1:"+userFailMy_1+";",
+					"userUnable:"+userUnable,
+					((double)userSuccessMy_1)/(userSuccessMy_1+userFailMy_1+userUnable));
+			System.out.println();
+			System.out.printf("%-20s%-20s%-20s%.4f",
+					"userSuccessRef_1:"+userSuccessRef_1+";",
+					"userFailMy_1:"+userFailRef_1+";",
+					"userUnable:"+userUnable,
+					((double)userSuccessRef_1)/(userSuccessRef_1+userFailRef_1+userUnable));
+			System.out.println();
+			System.out.printf("%-20s%-20s%-20s%.4f",
+					"userSuccessMy_2:"+userSuccessMy_2+";",
+					"userFailMy_2:"+userFailMy_2+";",
+					"userUnable:"+userUnable,
+					((double)userSuccessMy_2)/(userSuccessMy_2+userFailMy_2+userUnable));
+			System.out.println();
+			System.out.printf("%-20s%-20s%-20s%.4f",
+					"userSuccessRef_2:"+userSuccessRef_2+";",
+					"userFailRef_2:"+userFailRef_2+";",
+					"userUnable:"+userUnable,
+					((double)userSuccessRef_2)/(userSuccessRef_2+userFailRef_2+userUnable));
+			System.out.println("\n++++++++++++++++++++++++++++++++++++++");
+			cellTraList = null;
+			testTraNoList = null;
+			regionList = null;
+			regionTraList = null;
+			modelMap = null;
+			numArr = null;
+		}//user
+		//总计时
+		long endMillis = System.currentTimeMillis();
+		System.out.println("total time:"+(endMillis-startMillis)/1000+"s");
 	}
 
 	//热力图
@@ -1116,85 +1516,76 @@ public class EvaAlgoriOne_1 {
 		System.out.print(jsonString);
 	}
 	
-   public static void insertGoodPoint(){
-	    Connection conn = null;
+	//各用户时间段分布统计
+    public static void testSeven() throws SQLException{
+    	//start 代码执行太慢
+    	/*Connection conn = null;
 		Statement stmt = null;
 		ResultSet rs = null;
 		String sql = "";
-		ArrayList<String> testUserIdList = new ArrayList<String>();
-		sql = "SELECT DISTINCT UserId FROM goodTra";
-		try {
-			conn = JdbcUtil.getConnection();
-			stmt = conn.createStatement();
+		conn = JdbcUtil.getConnection();
+		stmt = conn.createStatement();
+		
+		ArrayList<String> userIdList = new ArrayList<String>();
+		sql = "SELECT DISTINCT UserId FROM goodtra";
+		rs = stmt.executeQuery(sql);
+		while(rs.next()){
+			userIdList.add(rs.getString("UserId"));
+		}
+		//循环每个用户
+		for(String userId:userIdList){
+			System.out.println("UserID: "+userId);
+			int[] count = new int[24];
+			ArrayList<String> userTraNo = new ArrayList<String>();
+			sql = "SELECT TraNum FROM trajectory WHERE UserId='"+userId+"'";
 			rs = stmt.executeQuery(sql);
 			while(rs.next()){
-				testUserIdList.add(rs.getString("UserId"));
+				userTraNo.add(rs.getString("TraNum"));
 			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally{
-//			JdbcUtil.close(conn, stmt);
-		}
-		//得到每个测试用户的全部轨迹号。
-		ArrayList<TestUser> testUserList = new ArrayList<TestUser>();
-		for(String userId:testUserIdList){
-			if(Integer.parseInt(userId)<85)
-				continue;
-			ArrayList<String> userTraNo = new ArrayList<String>();
-			sql = "SELECT TraNum FROM goodTra WHERE UserId='"+userId+"'";
-			try{
+			for(String traNum:userTraNo){
+				sql = "SELECT DateTime from location WHERE TraNum='"+traNum+"'";
 				rs = stmt.executeQuery(sql);
 				while(rs.next()){
-					userTraNo.add(rs.getString("TraNum"));
-				}
-			}catch(SQLException e){
-				e.printStackTrace();
-			}finally{
-//				JdbcUtil.close(conn, stmt);
-			}
-			testUserList.add(new TestUser(userId, userTraNo));
-		}
-		
-		//对于测试集中的每个用户
-		for(TestUser testUser:testUserList){
-			System.out.println("current:"+testUser.getUserId());
-			for(String traNo:testUser.getEffectiveTraNo()){
-				
-				ArrayList<GPSPoint> traPointsList = new ArrayList<GPSPoint>();
-				sql = "SELECT Long_gcj,Lat_gcj,DateTime FROM Location where TraNum='"+traNo+"' ORDER BY DateTime";
-				try {
-					rs = stmt.executeQuery(sql);
-					while(rs.next()){
-						GPSPoint point = new GPSPoint(rs.getString("Long_gcj"), rs.getString("Lat_gcj"), rs.getString("DateTime"));
-						traPointsList.add(point);
-					}
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				traPointsList = TraFilter.getSparsedTra(traPointsList);//过滤
-				for(GPSPoint point:traPointsList){
-					sql = "insert into filteredpoints(UserId,TraNum,DateTime,Longitude,Latitude) values('"+testUser.getUserId()+"','"+traNo+"','"+point.getDateTime()+"','"+point.getLang()+"','"+point.getLat()+"')";
+					String datetime = rs.getString("DateTime");
+					Date date = null;
+					DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					df.setTimeZone(TimeZone.getTimeZone("GMT+0800"));
 					try {
-						stmt.execute(sql);
-					} catch (SQLException e) {
+						date = df.parse(datetime);
+					} catch (ParseException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(date);
+					int hour = calendar.get(Calendar.HOUR_OF_DAY);//周天为0
+					count[hour] ++;
 				}
 			}
-		}//user
-		JdbcUtil.close(conn, stmt);
-   }
-   
-	public static void main(String[] args) {
+			int total = 0;
+			for(int i:count){
+				total+=i;
+				System.out.println(i);
+			}
+			System.out.println("total: "+total);
+			System.out.println("++++++++++++++++++++++++++++++++++++");
+		}
+		JdbcUtil.close(conn, stmt);*/
+    	//end
+    	//各用户时间段分布
+    	//select UserId,count(*),Hour(DateTime) from location where UserId in ('001') and TraNum in (select TraNum from goodtra) GROUP BY UserId, Hour(DateTime);
+    	//工作日，周末，轨迹条数统计，轨迹点数统计，平均轨迹点数统计
+    }
+    
+	public static void main(String[] args) throws FileNotFoundException, SQLException {
 //		insertGoodPoint();
 //		testOne();//预测测试
 //		testTwo();//轨迹过滤效果，各个用户轨迹过滤前后轨迹点数
 //		testThree();//每个用户的region数，model数
-//		testFive();//预测测试，使用已知region的方式，使用数据库中保存的过滤后的点
-		testSex();
+//		testFive();//预测测试，使用已知region的方式，使用数据库中保存的过滤后的点，带参数
+//		testFive(1,2,1.2,1.0);//预测测试，使用已知region的方式，使用数据库中保存的过滤后的点，带参数
+//		testSex();//热力图
+//		testSeven();//各用户位置点时间段统计，不实用
 	}
 
 }

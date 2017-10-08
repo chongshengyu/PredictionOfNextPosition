@@ -1,13 +1,14 @@
 package com.yu.draw.util;
 
 import com.yu.draw.entity.GPS;
+import com.yu.draw.entity.GPSPoint;
 
 public class ConvertDistGPS {
 	/**
 	 * 
 	 * @param gps 起点
 	 * @param distance 距离，单位公里
-	 * @param angle
+	 * @param angle 正北方向，顺时针夹角
 	 * @return
 	 */
 	public static GPS ConvertDistanceToLogLat(GPS gps, double distance, double angle)
@@ -25,6 +26,37 @@ public class ConvertDistGPS {
 	 * @return 两点距离，单位公里
 	 */
 	public static double ConvertLogLatToDistance(GPS gps1, GPS gps2){
+		double distance = 0;
+		//地球半径   
+	    double R=6378137.0;//单位米 
+	    //模拟数据  
+	    double lat1=Double.parseDouble(gps1.getLatitude());  
+	    double log1=Double.parseDouble(gps1.getLongitude());  
+	    double lat2=Double.parseDouble(gps2.getLatitude());  
+	    double log2= Double.parseDouble(gps2.getLongitude());  
+	    //将角度转化为弧度  
+	    double radLat1=(lat1*Math.PI/180.0);  
+	    double radLat2=(lat2*Math.PI/180.0);  
+	    double radLog1=(log1*Math.PI/180.0);  
+	    double radLog2=(log2*Math.PI/180.0);  
+	    //纬度的差值  
+	    double a=radLat1-radLat2;  
+	    //经度差值  
+	    double b=radLog1-radLog2;  
+	    //弧度长度  
+	    distance=2*Math.asin(Math.sqrt(Math.pow(Math.sin(a/2), 2)+Math.cos(radLat1)*Math.cos(radLat2)*Math.pow(Math.sin(b/2), 2)));  
+	    //获取长度  
+	    distance=distance*R;  
+	    //返回最接近参数的 long。结果将舍入为整数：加上 1/2  
+	    distance=Math.round(distance*10000)/10000;  
+	    distance = distance / 1000;
+//	    System.out.println(distance);
+		return distance;
+	}
+	
+	public static double ConvertLogLatToDistance(GPSPoint gpst1, GPSPoint gpst2){
+		GPS gps1 = new GPS(gpst1.getLang(),gpst1.getLat());
+		GPS gps2 = new GPS(gpst2.getLang(),gpst2.getLat());
 		double distance = 0;
 		//地球半径   
 	    double R=6378137.0;//单位米 

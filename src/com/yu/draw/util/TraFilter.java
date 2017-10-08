@@ -15,33 +15,11 @@ public class TraFilter {
 	 * @return
 	 */
 	public static ArrayList<GPSPoint> getSparsedTra(ArrayList<GPSPoint> traOld){
-		/*final int para = 15;//每隔para个点取一次
-		ArrayList<GPSPoint> tra = new ArrayList<GPSPoint>();
-		int i = 0;
-		for(GPSPoint p:traOld){
-			if(i % para == 0){
-				tra.add(p);
-			}
-			i++;
-		}
-		return tra;*/
-		/*final int para = Parameter.FILTER_STEP_LENGTH;//每隔para个点取一次
-		ArrayList<GPSPoint> tra = new ArrayList<GPSPoint>();
-		int i = 0;
-		for(GPSPoint p:traOld){
-			if(i % para == 0){
-				tra.add(p);
-			}
-			i++;
-		}
-		traOld = null;
-		return tra;*/
-		//更改为对轨迹的过滤
 		//最好是线性时间
 		ArrayList<GPSPoint> tra = traOld;//结果轨迹
 		//---------------------------------------------------期刊论文
 		//step1.根据朝向过滤
-		tra = getFilterdTraByOrientation(traOld);
+		tra = getFilterdTraByOrientation(tra);
 		
 		//step2.根据距离过滤
 		tra = getFilteredTraByDistance(tra);
@@ -49,13 +27,14 @@ public class TraFilter {
 		//step3.尖点过滤
 		tra = getFilteredTraByTriangle(tra);
 		
-		//----------------------------------------------------会议论文
-		/*//step1.尖点过滤
+		/*----------------------------------------------------会议论文
+		//step1.尖点过滤
 		tra = getFilteredTraByTriangle(tra);
 		//step2.距离过滤
 		tra = getFilteredTraByDistance2(tra);
 		//again
-		tra = getFilteredTraByTriangle(tra);*/
+		tra = getFilteredTraByTriangle(tra);
+		*/
 		return tra;
 	}
 	

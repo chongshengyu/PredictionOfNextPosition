@@ -35,6 +35,7 @@ $.ajax({
 							"<option value='" + userTras[i] + "'>"
 									+ userTras[i] + "</option>");
 				}
+				tranumOnchange();
 			}
 		});
 		// 填充userId列表
@@ -67,6 +68,7 @@ function useridOnchange() {
 						"<option value='" + userTras[i] + "'>" + userTras[i]
 								+ "</option>");
 			}
+			tranumOnchange();
 		}
 	});
 }
@@ -74,6 +76,7 @@ function useridOnchange() {
 function nextOnClick(){
 	var nextTid = $("#dropTid option:selected").next().val();
 	$("#dropTid").find("option[value='"+nextTid+"']").attr("selected",true);
+	tranumOnchange();
 	submitOnClick();
 }
 //set fit view
@@ -84,10 +87,30 @@ function setFitViewOnClick(){
 function outputTraNo(){
 	console.log($('#dropTid').val());
 }
+
+//tranum下拉框变化的响应，获取星期几
+function tranumOnchange(){
+	$('#input_week').empty();
+	var tranum = $('#dropTid').val();
+	$.ajax({
+		type:"get",
+		async:false,
+		charset:"UTF-8",
+		url: "/Paper/EvaAlgoriTestServlet",
+		data:"type=getWeek&tid="+tranum,
+		dataType:"text",
+		error:function(){alert("error");},
+		success:function(data){
+			$('#input_week').val(data);
+		}
+	});
+}
+
 // 点击确定的响应
 function submitOnClick() {
 	// 获取纠偏后的位置点，或者纠偏前后的位置点
 	map.clearMap();
+	tranumOnchange();
 	var userid = $('#dropUid').val();
 	var traid = $('#dropTid').val();
 	var corrected = 0;
@@ -160,7 +183,7 @@ function submitOnClick() {
 			        
 					for(var i=0;i<out[1].length;i++){
 						lineArr[lineArr.length] = [out[1][i]['lang'],out[1][i]['lat']];
-						//可以临时注释
+						//------可以临时注释
 						/*var marker = new AMap.Marker({
 				            icon: "source/img/circle.png",
 				            position: [out[1][i]['lang'], out[1][i]['lat']],
@@ -169,6 +192,7 @@ function submitOnClick() {
 							extData:out[1][i]['dateTime'],
 				        });
 				        marker.setMap(map);*/
+				        //------可以临时注释
 					}
 				    var polyline = new AMap.Polyline({//纠偏后的轨迹
 				        path: lineArr,          //设置线覆盖物路径
@@ -201,7 +225,7 @@ function submitOnClick() {
 					var out = data;
 					for(var i=0;i<out[2].length;i++){
 						lineArr[lineArr.length] = [out[2][i]['lang'],out[2][i]['lat']];
-					    //可以临时注释
+					    //----可以临时注释
 						/*var marker = new AMap.Marker({
 				            icon: "source/img/circle.png",
 				            position: [out[2][i]['lang'], out[2][i]['lat']],
@@ -210,6 +234,7 @@ function submitOnClick() {
 							extData:out[2][i]['dateTime'],
 				        });
 				        marker.setMap(map);*/
+				        //----可以临时注释
 					}
 				    var polyline = new AMap.Polyline({//过滤后的轨迹
 				        path: lineArr,          //设置线覆盖物路径

@@ -228,7 +228,7 @@ public class EvaAlgoriTestServlet2 extends HttpServlet {
 			//session中的modelMap
 			@SuppressWarnings("unchecked")
 			HashMap<Region, ArrayList<RegionModel>> modelMap = (HashMap<Region, ArrayList<RegionModel>>)request.getSession().getAttribute("modelMap");
-			HashMap<Region, ResultScores> scoreMap = TraUtil.getScoreMap(gpsList, originGps, time, modelMap);
+			HashMap<Region, ResultScores> scoreMap = TraUtil.getScoreMap(gpsList, originGps, time, modelMap, 1.2, 1.0);
 			ArrayList<RectangleZoneWithScore> rectangleScoreList = new ArrayList<RectangleZoneWithScore>();
 			if(scoreMap !=null){
 				for(Region region:scoreMap.keySet()){

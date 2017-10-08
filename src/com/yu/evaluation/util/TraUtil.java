@@ -116,9 +116,11 @@ public class TraUtil {
 	 * @param originGps 视图中心点
 	 * @param time 选定预测时间
 	 * @param modelMap 该用户的模型
+	 * @param tH tao_H
+	 * @param tL tao_L
 	 * @return 打分结果
 	 */
-	public static HashMap<Region, ResultScores> getScoreMap(ArrayList<GPS> gpsList,GPS originGps, String time,HashMap<Region, ArrayList<RegionModel>> modelMap){
+	public static HashMap<Region, ResultScores> getScoreMap(ArrayList<GPS> gpsList,GPS originGps, String time,HashMap<Region, ArrayList<RegionModel>> modelMap, double tH, double tL){
 		GPSCell cellFirst = null;
 		GPSCell cellSecond = null;
 		Region regionFirst = null;
@@ -167,7 +169,7 @@ public class TraUtil {
 		if(regionFirst == null){//只知道当前region，不知道上一个region
 			for(RegionModel rm:regionModelList){
 				Region nextRegion = rm.getNext();
-				double myScore = PredictionUtil.getScoreByTwoTime(rm.getNextTime(), time);
+				double myScore = PredictionUtil.getScoreByTwoTime(rm.getNextTime(), time, tH, tL);
 				if(scoreMap.containsKey(nextRegion)){
 					//PredictionUtil.keep2bit(scoreMap.get(nextRegion) + score)
 					scoreMap.put(nextRegion, new ResultScores(PredictionUtil.keep2bit(scoreMap.get(nextRegion).getMyScore()+myScore), scoreMap.get(nextRegion).getRefScore()+1));//加上新的分数
@@ -198,9 +200,11 @@ public class TraUtil {
 	 * 论文打分算法，得到每个region的分值，已知的是knownRegionList
 	 * @param knownRegionList 测试用户的已知regionTime序列，有1-2个。每个regionTime包含一个Region和到达该Region的时间
 	 * @param modelMap 用户模型
+	 * @param tH tao_H
+	 * @param tL tao_L
 	 * @return 打分结果
 	 */
-	public static HashMap<Region, ResultScores> getScoreMap(ArrayList<RegionTime> knownRegionList,HashMap<Region, ArrayList<RegionModel>> modelMap){
+	public static HashMap<Region, ResultScores> getScoreMap(ArrayList<RegionTime> knownRegionList,HashMap<Region, ArrayList<RegionModel>> modelMap, double tH, double tL){
 		Region firstRegion = null;//前一个
 		Region secondRegion = null;//当前
 		String firstTime = "";
@@ -221,7 +225,7 @@ public class TraUtil {
 			}
 			for(RegionModel rm:regionModelList){
 				Region nextRegion = rm.getNext();
-				double myScore = PredictionUtil.getScoreByTwoTime(rm.getNextTime(),secondTime);
+				double myScore = PredictionUtil.getScoreByTwoTime(rm.getNextTime(),secondTime, tH, tL);
 				if(scoreMap.containsKey(nextRegion)){
 					scoreMap.put(nextRegion, new ResultScores(scoreMap.get(nextRegion).getMyScore()+myScore, scoreMap.get(nextRegion).getRefScore()+1));//加上新的分数
 				}else{
@@ -240,7 +244,7 @@ public class TraUtil {
 			for(RegionModel rm:regionModelList){
 				if(firstRegion.equals(rm.getPre())){//只增加两次region都匹配的分值
 					Region nextRegion = rm.getNext();
-					double myScore = PredictionUtil.getScoreByTwoTime(rm.getNextTime(),secondTime);
+					double myScore = PredictionUtil.getScoreByTwoTime(rm.getNextTime(),secondTime, tH, tL);
 					if(scoreMap.containsKey(nextRegion)){
 						scoreMap.put(nextRegion, new ResultScores(scoreMap.get(nextRegion).getMyScore()+myScore, scoreMap.get(nextRegion).getRefScore()+1));//加上新的分数
 					}else{
@@ -252,7 +256,7 @@ public class TraUtil {
 			if(!matchBoolean){//前一个Region都没有匹配，则按照只知道当前一个region的方法处理
 				for(RegionModel rm:regionModelList){
 					Region nextRegion = rm.getNext();
-					double myScore = PredictionUtil.getScoreByTwoTime(rm.getNextTime(),secondTime);
+					double myScore = PredictionUtil.getScoreByTwoTime(rm.getNextTime(),secondTime, tH, tL);
 					if(scoreMap.containsKey(nextRegion)){
 						scoreMap.put(nextRegion, new ResultScores(scoreMap.get(nextRegion).getMyScore()+myScore, scoreMap.get(nextRegion).getRefScore()+1));//加上新的分数
 					}else{
@@ -325,6 +329,7 @@ public class TraUtil {
 		Date date = null;
 		try {
 			date = df.parse(tranum.substring(3));
+//			date = df.parse(tranum);
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -339,6 +344,11 @@ public class TraUtil {
 //		System.out.println(weekDay);
 //		System.out.println("sunday"+Calendar.SUNDAY);
 //		System.out.println("monday"+Calendar.MONDAY);
+		System.out.println(weekDay);
 		return ""+weekDay;
+	}
+	
+	public static void main(String[] args){
+		System.out.println(getWeekByTraNum("2015-01-01 17:00:00"));
 	}
 }

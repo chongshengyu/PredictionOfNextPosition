@@ -59,7 +59,7 @@ public class File2Datebase {
 		new Thread() {
 			public void run() {
 				DataAccess dataAccess = new DataAccess();
-				for (int i = 120; i < 130; i++) {
+				for (int i = 160; i < 170; i++) {
 					String userId = String.valueOf(i);
 //					String userId = "0" + String.valueOf(i);
 					try {
@@ -75,7 +75,7 @@ public class File2Datebase {
 		new Thread(){
 			public void run() {
 				DataAccess dataAccess = new DataAccess();
-				for (int i = 130; i < 140; i++) {
+				for (int i = 170; i < 180; i++) {
 					String userId = String.valueOf(i);
 //					String userId = "0" + String.valueOf(i);
 					try {
@@ -91,7 +91,7 @@ public class File2Datebase {
 		new Thread(){
 			public void run() {
 				DataAccess dataAccess = new DataAccess();
-				for (int i = 140; i < 150; i++) {
+				for (int i = 180; i < 182; i++) {
 					String userId = String.valueOf(i);
 //					String userId = "0" + String.valueOf(i);
 					try {

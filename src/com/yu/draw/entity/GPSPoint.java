@@ -4,11 +4,13 @@ public class GPSPoint {
 	private String lang;
 	private String lat;
 	private String dateTime;
+	public boolean visited;
 	public GPSPoint(String lang, String lat, String dateTime) {
 		super();
 		this.lang = lang;
 		this.lat = lat;
 		this.dateTime = dateTime;
+		visited = false;
 	}
 	public String getLang() {
 		return lang;

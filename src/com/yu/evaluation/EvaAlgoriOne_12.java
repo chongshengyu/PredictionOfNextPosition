@@ -180,7 +180,7 @@ public class EvaAlgoriOne_12 {
 					knownGpsPoint.add(new GPS(gpsPoint.getLang(),gpsPoint.getLat()));
 
 					//根据历史数据得到的regions里不能包含当前待预测的点怎么办????????????????????????????????
-					HashMap<Region, ResultScores> scoreMap = TraUtil.getScoreMap(knownGpsPoint, originGps, time, modelMap);
+					HashMap<Region, ResultScores> scoreMap = TraUtil.getScoreMap(knownGpsPoint, originGps, time, modelMap, 1.2, 1.0);
 					if(scoreMap == null){
 						traUnablePredictin ++;
 						continue;

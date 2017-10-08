@@ -22,6 +22,7 @@ import com.yu.draw.entity.Parameter;
 import com.yu.draw.entity.Region;
 import com.yu.draw.entity.RegionModel;
 import com.yu.draw.entity.RegionTime;
+import com.yu.evaluation.entity.ResultTypeQiao;
 
 public class GridUtil {
 	private static ArrayList<GridCell> cellList;
@@ -95,6 +96,14 @@ public class GridUtil {
 			return null;
 		return new GPSCell(x, y, gps.getDateTime());
 	}
+	
+	// 由GPSCell坐标得到该Cell的中心点GPS坐标，时间域无效。originGps是grid左下角坐标
+	public static GPSPoint CellToGPS(GPSCell cell, GPS originGps){
+		GPSPoint point = null;
+		String lang = ConvertDistGPS.ConvertDistanceToLogLat(originGps, Parameter.cellWidth * cell.getGridX() + (Parameter.cellWidth / 2.0), 90).getLongitude();
+		String lat = ConvertDistGPS.ConvertDistanceToLogLat(originGps, Parameter.cellWidth * cell.getGridY() + (Parameter.cellWidth / 2.0), 0).getLatitude();
+		return new GPSPoint(lang, lat, "");
+	}
 
 	// 由GPS轨迹的到cell轨迹
 	public static ArrayList<GPSCell> GPSTraToCellTra(
@@ -132,6 +141,51 @@ public class GridUtil {
 			arrayList.add(cell);
 		}
 		return arrayList;
+	}
+	
+	// 由GPS轨迹的到cell轨迹
+	public static ResultTypeQiao GPSTraToCellTraQiao(
+			ArrayList<GPSPoint> pointList, GPS originGps) {
+		LinkedList<GPSCell> cellListTmp = new LinkedList<GPSCell>();
+		LinkedList<GPSPoint> pointListTmp = new LinkedList<GPSPoint>();
+		for (GPSPoint point : pointList) {
+			GPSCell cell = GPSToGPSCell(point, originGps);
+			if (cell == null) {// 超出grid范围，舍弃
+				continue;
+			}
+			if (cellListTmp.size() == 0) {
+				cellListTmp.add(cell);
+				pointListTmp.add(point);
+			} else {
+				if (cell.getGridX() == cellListTmp.get(cellListTmp.size() - 1)
+						.getGridX()
+						&& cell.getGridY() == cellListTmp.get(cellListTmp.size() - 1)
+								.getGridY()) {
+					// 还在同一个cell，舍弃
+				} else {
+					// 不在同一个cell，插入
+					cellListTmp.add(cell);
+					pointListTmp.add(point);
+				}
+			}
+		}
+		// 还要通过插值法，保证只能横向或纵向移动？需要吗？
+		/*
+		 * int i = 0; for (GPSCell cell : cellList) { if(i != 0){//从第一个开始 int
+		 * preX = cellList.get(i -1).getGridX(); int preY = cellList.get(i
+		 * -1).getGridY(); int x = cellList.get(i).getGridX(); int y =
+		 * cellList.get(i).getGridY(); } i++; }
+		 */
+		// 转为ArrayList
+		ArrayList<GPSCell> arrayListCell = new ArrayList<GPSCell>();
+		ArrayList<GPSPoint> arrayListPoint = new ArrayList<GPSPoint>();
+		for (GPSCell cell : cellListTmp) {
+			arrayListCell.add(cell);
+		}
+		for(GPSPoint point:pointListTmp){
+			arrayListPoint.add(point);
+		}
+		return new ResultTypeQiao(arrayListCell,arrayListPoint);
 	}
 
 	/**

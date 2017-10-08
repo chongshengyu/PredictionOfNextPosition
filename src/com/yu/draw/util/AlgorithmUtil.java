@@ -50,9 +50,11 @@ public class AlgorithmUtil {
 	 * @param originGps 视图中心点
 	 * @param time 选定预测时间
 	 * @param modelMap 该用户的模型
+	 * @param tH tao_H
+	 * @param tL tao_L
 	 * @return 预测结果
 	 */
-	public static HashMap<Region, Double> getScoreMap(ArrayList<GPS> gpsList,GPS originGps, String time,HashMap<Region, ArrayList<RegionModel>> modelMap){
+	public static HashMap<Region, Double> getScoreMap(ArrayList<GPS> gpsList,GPS originGps, String time,HashMap<Region, ArrayList<RegionModel>> modelMap, double tH, double tL){
 		Region resultRegion = null;
 		GPSCell cellFirst = null;
 		GPSCell cellSecond = null;
@@ -109,7 +111,7 @@ public class AlgorithmUtil {
 		if(regionFirst == null){//只知道当前region，不知道上一个region
 			for(RegionModel rm:regionModelList){
 				Region nextRegion = rm.getNext();
-				double score = PredictionUtil.getScoreByTwoTime(rm.getNextTime(), time);
+				double score = PredictionUtil.getScoreByTwoTime(rm.getNextTime(), time, tH, tL);
 				if(scoreMap.containsKey(nextRegion)){
 					scoreMap.put(nextRegion, scoreMap.get(nextRegion) + score);//加上新的分数
 				}else{
@@ -121,7 +123,7 @@ public class AlgorithmUtil {
 				Region nextRegion = rm.getNext();
 				Region preRegion = rm.getPre();
 				if(preRegion != null && preRegion.equals(regionFirst)){//两次region都匹配
-					double score = PredictionUtil.getScoreByTwoTime(rm.getNextTime(), time);
+					double score = PredictionUtil.getScoreByTwoTime(rm.getNextTime(), time, tH, tL);
 					if(scoreMap.containsKey(nextRegion)){
 						scoreMap.put(nextRegion, scoreMap.get(nextRegion) + score);//加上新的分数
 					}else{

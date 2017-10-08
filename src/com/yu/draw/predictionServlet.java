@@ -145,7 +145,7 @@ public class predictionServlet extends HttpServlet {
 			System.out.println("grid原点"+originGps);
 			//session中的modelMap
 			HashMap<Region, ArrayList<RegionModel>> modelMap = (HashMap<Region, ArrayList<RegionModel>>)request.getSession().getAttribute("modelMap");
-			HashMap<Region, Double> scoreMap = AlgorithmUtil.getScoreMap(gpsList, originGps, time, modelMap);
+			HashMap<Region, Double> scoreMap = AlgorithmUtil.getScoreMap(gpsList, originGps, time, modelMap, 1.2, 1.0);
 			ArrayList<RectangleZoneWithScore> rectangleScoreList = new ArrayList<RectangleZoneWithScore>();
 			for(Region region:scoreMap.keySet()){
 				rectangleScoreList.add(new RectangleZoneWithScore(region.getLuGps().getLongitude(), region.getLuGps().getLatitude(), region.getRdGps().getLongitude(), region.getRdGps().getLatitude(), ""+scoreMap.get(region)));
