@@ -461,15 +461,15 @@ public class EvaAlgoriOne_1 {
 			userTotalRegion5 += regionList5.size();
 			
 			System.out.println("======================================");
-			System.out.println("userTotalRegion1:"+userTotalRegion1);
+			System.out.println("userTotalRegionMaxW1:"+userTotalRegion1);
 			System.out.println("----------------------");
-			System.out.println("userTotalRegion2:"+userTotalRegion2);
+			System.out.println("userTotalRegionMaxW2:"+userTotalRegion2);
 			System.out.println("----------------------");
-			System.out.println("userTotalRegion3:"+userTotalRegion3);
+			System.out.println("userTotalRegionMaxW3:"+userTotalRegion3);
 			System.out.println("----------------------");
-			System.out.println("userTotalRegion4:"+userTotalRegion4);
+			System.out.println("userTotalRegionMaxW4:"+userTotalRegion4);
 			System.out.println("----------------------");
-			System.out.println("userTotalRegion5:"+userTotalRegion5);
+			System.out.println("userTotalRegionMaxW5:"+userTotalRegion5);
 			System.out.println("======================================");
 		}
 	}

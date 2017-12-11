@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -158,6 +159,11 @@ public class EvaAlgori_Qiao {
 		Parameter.cellWidth = 0.2;
 		Parameter.gridWidth = 200;//保证grid边长为40km
 		
+		ArrayList<String> userIdListToTest = new ArrayList<String>();
+		String[] s  = {"013","046","085","113","115","147","168","179"};
+		System.out.println("UserIds to Test："+Arrays.toString(s));
+		userIdListToTest.addAll(Arrays.asList(s));
+		
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -169,7 +175,12 @@ public class EvaAlgori_Qiao {
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery(sql);
 			while(rs.next()){
-				testUserIdList.add(rs.getString("UserId"));
+				String uid = rs.getString("UserId");
+				for(String ss:userIdListToTest){
+					if(uid.equals(ss)){
+						testUserIdList.add(uid);
+					}
+				}
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -196,7 +207,7 @@ public class EvaAlgori_Qiao {
 			}
 			testUserList.add(new TestUser(userId, userTraNo));
 		}
-		System.setOut(new PrintStream(new File("F:\\OneDrive\\NextPositionPrediction\\实验\\1006\\tmp1")));
+//		System.setOut(new PrintStream(new File("F:\\OneDrive\\NextPositionPrediction\\实验\\1006\\tmp1")));
 //		System.out.println("Parameter.cellWidth="+Parameter.cellWidth);
 //		System.out.println("Parameter.gridWidth="+Parameter.gridWidth);
 		System.out.println();
@@ -274,7 +285,7 @@ public class EvaAlgori_Qiao {
 					allPoints.add(point);//浅拷贝 
 				}
 			}
-			System.out.println("网格points总数："+allPoints.size());
+//			System.out.println("网格points总数："+allPoints.size());
 			
 			Para pa = new Para();//调试时计数
 			for(GPSPoint point:allPoints){
@@ -346,8 +357,9 @@ public class EvaAlgori_Qiao {
 			System.out.println("testTraCnt:"+testTraNoList.size());
 			//对每个测试轨迹进行测试
 			for(String testTraNo:testTraNoList){
+				ArrayList<Double> misList = new ArrayList<Double>();//在该轨迹上预测的误差序列
 				//得到与当前测试轨迹对应的训练集轨迹号
-//				System.out.println("current tra:"+testTraNo);
+				System.out.println("current tra:"+testTraNo);
 				conn = null;
 				stmt = null;
 				rs = null;
@@ -416,9 +428,9 @@ public class EvaAlgori_Qiao {
 			        	}
 			        }
 
-					double avgMis = -9999;
+					double avgMis = 9999;
 			        if(maxHidden == -1){//失败
-			        	//avgMis = -9999;
+			        	//avgMis = 9999;
 			        }else{
 			        	GPSCell nextCell = cellList.get(cellIndex + 1);//下一个cell，实际结果
 			        	ArrayList<GPSPoint> cluster = clusters.get(maxHidden);
@@ -429,11 +441,18 @@ public class EvaAlgori_Qiao {
 			        	}
 			        	avgMis /= cluster.size();
 			        }
-			        System.out.println(formatDouble(avgMis));
+//			        System.out.println(formatDouble(avgMis));
+			        misList.add(avgMis);
 					/*************************以上乔算法***********************/
-			        //根据误差确定对该用户的预测精度。
-			        
 				}//each testObsTra
+				
+		        //根据误差确定对该用户该轨迹的预测精度。
+		        int rightCnt = 0;
+		        for(double d:misList){
+		        	if(d < 1.0)
+		        		rightCnt++;
+		        }
+		        System.out.println("Correct Rate of Current Trace:"+formatDouble(1.0*rightCnt/misList.size()));
 			}//each testTra
 		}//each user
 		
@@ -445,7 +464,7 @@ public class EvaAlgori_Qiao {
     }
 	public static void main(String[] args) throws FileNotFoundException {
 		//
-//		testOne();
+		testOne();
 		
 //		System.out.println(ConvertDistGPS.ConvertLogLatToDistance(new GPS("116.1","36.1"),new GPS("116.1","36.1")));
 //		System.out.println(ConvertDistGPS.ConvertDistanceToLogLat(new GPS("116","36"),100,90));
